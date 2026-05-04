@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>lost the route — la route</title>
+<meta name="theme-color" content="#0a0805">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400&display=swap">
+<style>
+  :root {
+    --bg: #0a0805;
+    --ink: #ebe2d4;
+    --muted: #786c5e;
+    --accent: #d6541d;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    height: 100%;
+  }
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      radial-gradient(ellipse 90% 55% at 50% -10%, rgba(214, 84, 29, 0.14), transparent 65%),
+      radial-gradient(ellipse 80% 60% at 50% 115%, rgba(196, 58, 106, 0.10), transparent 60%);
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.84  0 0 0 0 0.55  0 0 0 0 0.32  0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.06;
+    mix-blend-mode: overlay;
+  }
+  .wrap {
+    position: relative; z-index: 1;
+    height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 28px;
+    padding: 48px 32px;
+    text-align: center;
+  }
+  h1 {
+    font-family: 'Bodoni Moda', serif;
+    font-style: italic;
+    font-size: clamp(48px, 8vw, 92px);
+    font-weight: 400;
+    margin: 0;
+    line-height: 1;
+    color: var(--ink);
+    letter-spacing: -0.015em;
+  }
+  h1 em { color: var(--accent); font-weight: 500; }
+  .num {
+    font-family: 'Bodoni Moda', serif;
+    font-style: italic;
+    color: var(--accent);
+    font-size: 40px;
+    line-height: 1;
+  }
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: lowercase;
+    max-width: 480px;
+    line-height: 1.7;
+  }
+  a {
+    color: var(--accent);
+    text-decoration: none;
+    border: 1px solid var(--accent);
+    padding: 10px 22px;
+    border-radius: 4px;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    transition: background 100ms;
+  }
+  a:hover { background: rgba(214, 84, 29, 0.08); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="num">/404</span>
+    <h1>lost the <em>route</em>.</h1>
+    <p>this page is not part of the instrument. nothing here loops, drones, or sequences.</p>
+    <a href="/">return</a>
+  </div>
+</body>
+</html>

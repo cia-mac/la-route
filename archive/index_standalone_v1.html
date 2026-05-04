@@ -1,0 +1,909 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>acid-303</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap">
+<style>
+  :root {
+    --bg: #0e0e10;
+    --panel: #16161a;
+    --panel-2: #1d1d22;
+    --line: #28282f;
+    --ink: #e8e8ea;
+    --muted: #6e6e78;
+    --accent: #ff6a1a;
+    --accent-dim: #5a2a0a;
+    --slide: #4aa3ff;
+    --rest: #2a2a31;
+    --ok: #7dd87d;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+  }
+
+  /* tooltip */
+  [data-tip] { position: relative; }
+  [data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0a0a0c;
+    border: 1px solid var(--accent);
+    color: var(--ink);
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    white-space: normal;
+    width: max-content;
+    max-width: 280px;
+    text-align: left;
+    line-height: 1.55;
+    z-index: 1000;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+    pointer-events: none;
+  }
+  [data-tip]:hover::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 3px);
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--accent);
+    z-index: 1000;
+    pointer-events: none;
+  }
+  .app {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 28px 24px 60px;
+  }
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  h1 {
+    margin: 0;
+    font-size: 16px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  h1 .dot { color: var(--accent); }
+  .meta { color: var(--muted); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+  }
+  .panel h2 {
+    margin: 0 0 16px;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  /* sliders */
+  .sliders {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px 36px;
+  }
+  .slider {
+    display: flex; flex-direction: column;
+    gap: 6px;
+  }
+  .slider .head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 12px;
+  }
+  .slider .label {
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .slider .value {
+    font-size: 13px;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .slider input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  .slider input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid #0a0a0a;
+    cursor: grab;
+  }
+  .slider input[type="range"]::-webkit-slider-thumb:active { cursor: grabbing; }
+  .slider input[type="range"]::-moz-range-thumb {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid #0a0a0a;
+    cursor: grab;
+  }
+  .slider .tick { color: var(--muted); font-size: 10px; }
+
+  nav.devnav {
+    display: flex; gap: 4px;
+    margin-bottom: 18px;
+  }
+  nav.devnav a {
+    padding: 10px 16px;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--panel);
+  }
+  nav.devnav a.active { color: var(--ink); border-color: var(--accent); }
+  nav.devnav a:hover { color: var(--ink); }
+
+  /* transport */
+  .transport {
+    display: flex; align-items: center; gap: 14px;
+    flex-wrap: wrap;
+  }
+  button.btn {
+    background: var(--panel-2);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 10px 16px;
+    font: inherit;
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 80ms;
+  }
+  button.btn:hover { border-color: var(--muted); }
+  button.btn.primary {
+    background: var(--accent);
+    color: #0a0a0a;
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+  button.btn.primary.playing {
+    background: var(--ok);
+    border-color: var(--ok);
+  }
+  button.btn.toggle.on {
+    background: var(--accent);
+    color: #0a0a0a;
+    border-color: var(--accent);
+  }
+  .field {
+    display: flex; align-items: center; gap: 10px;
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .field input[type="number"] {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    font: inherit;
+    font-size: 14px;
+    padding: 8px 10px;
+    width: 80px;
+    border-radius: 3px;
+  }
+  .field select {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    font: inherit;
+    font-size: 13px;
+    padding: 8px 12px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* sequencer */
+  .seq {
+    display: grid;
+    grid-template-columns: 80px repeat(16, 1fr);
+    gap: 4px;
+    align-items: center;
+  }
+  .seq-row-label {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-align: right;
+    padding-right: 8px;
+  }
+  .step {
+    height: 32px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    color: var(--muted);
+    cursor: pointer;
+    font-variant-numeric: tabular-nums;
+    transition: background 60ms, color 60ms, border-color 60ms;
+  }
+  .step.note {
+    background: #20252b;
+    color: var(--ink);
+    border-color: #2c333b;
+  }
+  .step.note.octup { box-shadow: inset 0 2px 0 var(--accent); }
+  .step.note.octdn { box-shadow: inset 0 -2px 0 var(--accent); }
+  .step.rest { color: #3a3a42; }
+  .step.active { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .step.flash { background: var(--accent); color: #0a0a0a; }
+  .step.toggle { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; }
+  .step.toggle.on.accent { background: var(--accent); color: #0a0a0a; border-color: var(--accent); }
+  .step.toggle.on.slide { background: var(--slide); color: #0a0a0a; border-color: var(--slide); }
+  .step.toggle.on.gate { background: #2a2a31; color: var(--ink); border-color: #3a3a42; }
+  .step-num {
+    height: 16px;
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+  }
+  .step-num.beat { color: var(--ink); }
+
+  .row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .spacer { flex: 1; }
+
+  .hint {
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    line-height: 1.6;
+    margin-top: 14px;
+  }
+  .hint kbd {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 2px 6px;
+    font: inherit;
+    font-size: 11px;
+    color: var(--ink);
+  }
+
+  .preset-row { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  /* === refined surface — Inter, lowercase, lighter chrome === */
+  :root { --accent: #e85d1a; --line: #1f1f24; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI Variable', sans-serif;
+    font-weight: 300;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+  h1, .panel h2, .slider .label, .slider .value, .field, button.btn,
+  nav.devnav a, .meta, .seq-row-label, .step-num,
+  .hint, .hint kbd, .field select {
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  h1 { font-weight: 400; }
+  .panel h2 { font-weight: 400; opacity: 0.6; }
+  .slider .label { font-weight: 300; opacity: 0.85; }
+  .slider .value { font-weight: 400; font-variant-numeric: tabular-nums; }
+  .field { font-weight: 300; opacity: 0.85; }
+  .field input[type="number"] { font-variant-numeric: tabular-nums; font-weight: 400; }
+  nav.devnav a { font-weight: 400; }
+  button.btn { font-weight: 400; }
+  button.btn.primary { font-weight: 500; }
+  .meta { font-weight: 400; opacity: 0.7; }
+  .hint { font-weight: 300; opacity: 0.7; }
+  .seq-row-label { font-weight: 300; opacity: 0.7; }
+  .step.toggle { font-weight: 400; }
+
+  .slider input[type="range"]::-webkit-slider-thumb {
+    width: 14px; height: 14px;
+    border: none;
+    box-shadow: 0 0 0 2px var(--bg);
+  }
+  .slider input[type="range"]::-moz-range-thumb {
+    width: 14px; height: 14px;
+    border: none;
+    box-shadow: 0 0 0 2px var(--bg);
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>acid<span class="dot">·</span>303</h1>
+    <div class="meta" id="status">stopped</div>
+  </header>
+
+  <nav class="devnav">
+    <a href="index.html" class="active">acid · 303</a>
+    <a href="drone.html">drone</a>
+    <a href="ritual.html">ritual</a>
+    <a href="studio.html">studio</a>
+  </nav>
+
+  <div class="panel">
+    <h2>voice</h2>
+    <div class="sliders">
+      <div class="slider" data-param="tuning" data-tip="Master pitch in cents (±100 ct = ±1 semitone). Detunes the whole oscillator.">
+        <div class="head"><span class="label">tune</span><span class="value">0 ct</span></div>
+        <input type="range" min="0" max="1000" value="500" />
+      </div>
+      <div class="slider" data-param="cutoff" data-tip="Filter cutoff frequency. Low = dark and muffled. High = bright and open.">
+        <div class="head"><span class="label">cutoff</span><span class="value">600 hz</span></div>
+        <input type="range" min="0" max="1000" value="500" />
+      </div>
+      <div class="slider" data-param="resonance" data-tip="Filter peak. High values create the squelchy whistle near the cutoff. The 303's signature.">
+        <div class="head"><span class="label">reso</span><span class="value">70%</span></div>
+        <input type="range" min="0" max="1000" value="700" />
+      </div>
+      <div class="slider" data-param="envmod" data-tip="How wide the envelope opens the filter on each note. The wow factor — push it for sweep.">
+        <div class="head"><span class="label">env mod</span><span class="value">60%</span></div>
+        <input type="range" min="0" max="1000" value="600" />
+      </div>
+      <div class="slider" data-param="decay" data-tip="How fast the filter envelope falls back to cutoff. Short = punchy. Long = liquid.">
+        <div class="head"><span class="label">decay</span><span class="value">280 ms</span></div>
+        <input type="range" min="0" max="1000" value="500" />
+      </div>
+      <div class="slider" data-param="accent" data-tip="Boost on accented steps — volume, resonance, and env amount all jump together.">
+        <div class="head"><span class="label">accent</span><span class="value">50%</span></div>
+        <input type="range" min="0" max="1000" value="500" />
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>transport</h2>
+    <div class="transport">
+      <button class="btn primary" id="playBtn" data-tip="Start / stop the sequencer. Spacebar also works.">play</button>
+      <div class="field" data-tip="Beats per minute. Each step is a 16th note.">
+        <span>tempo</span>
+        <input type="number" id="tempo" min="40" max="220" step="1" value="128" />
+        <span>bpm</span>
+      </div>
+      <div class="field" data-tip="Oscillator shape. Saw = bright and full. Square = hollow, more 'reedy'.">
+        <span>wave</span>
+        <select id="wave">
+          <option value="sawtooth">saw</option>
+          <option value="square">square</option>
+        </select>
+      </div>
+      <div class="field" data-tip="Output saturation. Clean = no distortion. Grit = heavy harmonic distortion.">
+        <span>drive</span>
+        <select id="drive">
+          <option value="0">clean</option>
+          <option value="1" selected>warm</option>
+          <option value="2">dirt</option>
+          <option value="3">grit</option>
+        </select>
+      </div>
+      <div class="spacer"></div>
+      <div class="field">
+        <span>preset</span>
+        <div class="preset-row">
+          <button class="btn" data-preset="acid1" data-tip="Classic acid riff with slide and accents.">acid 1</button>
+          <button class="btn" data-preset="acid2" data-tip="Heavier, more aggressive squelch pattern.">acid 2</button>
+          <button class="btn" data-preset="rolling" data-tip="16th-note rolling bassline groove.">rolling</button>
+          <button class="btn" data-preset="dub" data-tip="Sparse, deep, long-decay groove.">dub</button>
+          <button class="btn" data-preset="clear" data-tip="Clear all steps to silence.">clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>sequencer</h2>
+    <div class="seq" id="numbers"></div>
+    <div class="seq" id="seqGrid" style="margin-top: 4px;"></div>
+    <div class="hint">
+      Click a <em>note</em> step to cycle pitch. <kbd>shift</kbd>-click to lower. <kbd>alt</kbd>-click to toggle rest. <kbd>cmd</kbd>/<kbd>ctrl</kbd>-click to shift octave. Drag knobs vertically.
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // --- audio context ---
+  let ac = null;
+  let masterGain = null;
+  let driveNode = null;
+  let postFilter = null;
+
+  function ensureAudio() {
+    if (ac) return;
+    ac = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = ac.createGain();
+    masterGain.gain.value = 0.5;
+    driveNode = ac.createWaveShaper();
+    driveNode.oversample = '4x';
+    setDrive(parseInt(document.getElementById('drive').value, 10));
+    postFilter = ac.createBiquadFilter();
+    postFilter.type = 'highpass';
+    postFilter.frequency.value = 30;
+    driveNode.connect(postFilter);
+    postFilter.connect(masterGain);
+    masterGain.connect(ac.destination);
+  }
+
+  function makeDriveCurve(amount) {
+    // amount 0..1 → soft saturation
+    const n = 1024;
+    const curve = new Float32Array(n);
+    const k = amount * 50 + 0.0001;
+    for (let i = 0; i < n; i++) {
+      const x = (i * 2) / n - 1;
+      curve[i] = Math.tanh(k * x) / Math.tanh(k);
+    }
+    return curve;
+  }
+  function setDrive(level) {
+    if (!driveNode) return;
+    const map = [0.05, 0.18, 0.45, 0.85];
+    driveNode.curve = makeDriveCurve(map[level]);
+  }
+
+  // --- params ---
+  const params = {
+    tuning: 0,    // -100..+100 cents
+    cutoff: 600,  // hz, 80..6000
+    resonance: 0.7, // 0..0.99 (mapped to Q)
+    envmod: 0.6,  // 0..1
+    decay: 0.28,  // 0.05..1.5 s
+    accent: 0.5,  // 0..1
+  };
+  const paramRanges = {
+    tuning:    { min: -100, max: 100,  unit: ' ct',  fmt: v => `${Math.round(v)} ct` },
+    cutoff:    { min: 80,   max: 6000, unit: ' hz',  log: true, fmt: v => `${Math.round(v)} hz` },
+    resonance: { min: 0,    max: 0.99, unit: '%',   fmt: v => `${Math.round(v*100)}%` },
+    envmod:    { min: 0,    max: 1,    unit: '%',   fmt: v => `${Math.round(v*100)}%` },
+    decay:     { min: 0.05, max: 1.5,  unit: ' ms', fmt: v => `${Math.round(v*1000)} ms` },
+    accent:    { min: 0,    max: 1,    unit: '%',   fmt: v => `${Math.round(v*100)}%` },
+  };
+
+  function paramToSlider(name) {
+    const r = paramRanges[name];
+    let t;
+    if (r.log) {
+      t = (Math.log(params[name]) - Math.log(r.min)) / (Math.log(r.max) - Math.log(r.min));
+    } else {
+      t = (params[name] - r.min) / (r.max - r.min);
+    }
+    return Math.round(Math.max(0, Math.min(1, t)) * 1000);
+  }
+  function sliderToParam(name, v) {
+    const r = paramRanges[name];
+    const t = v / 1000;
+    if (r.log) {
+      return Math.exp(Math.log(r.min) + t * (Math.log(r.max) - Math.log(r.min)));
+    }
+    return r.min + t * (r.max - r.min);
+  }
+
+  function refreshKnob(name) {
+    const el = document.querySelector(`.slider[data-param="${name}"]`);
+    if (!el) return;
+    el.querySelector('input').value = paramToSlider(name);
+    el.querySelector('.value').textContent = paramRanges[name].fmt(params[name]);
+  }
+
+  document.querySelectorAll('.slider[data-param]').forEach(el => {
+    const name = el.dataset.param;
+    refreshKnob(name);
+    const input = el.querySelector('input');
+    input.addEventListener('input', () => {
+      params[name] = sliderToParam(name, parseFloat(input.value));
+      el.querySelector('.value').textContent = paramRanges[name].fmt(params[name]);
+    });
+    el.querySelector('.label').addEventListener('dblclick', () => {
+      const defaults = { tuning: 0, cutoff: 600, resonance: 0.7, envmod: 0.6, decay: 0.28, accent: 0.5 };
+      params[name] = defaults[name];
+      refreshKnob(name);
+    });
+  });
+
+  // --- sequencer model ---
+  // each step: { rest: bool, note: semitones from C2 (0 = C2), oct: -1|0|1, accent, slide, gate }
+  const NUM_STEPS = 16;
+  // Pitch cycles within a single octave: C, C#, D, ..., B (0..11)
+  const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
+  function emptyStep() {
+    return { rest: true, pitch: 0, oct: 0, accent: false, slide: false, gate: true };
+  }
+  let steps = Array.from({ length: NUM_STEPS }, emptyStep);
+
+  // --- render sequencer ---
+  const numbersRow = document.getElementById('numbers');
+  const seqGrid = document.getElementById('seqGrid');
+
+  function render() {
+    numbersRow.innerHTML = '';
+    seqGrid.innerHTML = '';
+
+    // step numbers
+    const numLabel = document.createElement('div');
+    numLabel.className = 'seq-row-label';
+    numbersRow.appendChild(numLabel);
+    for (let i = 0; i < NUM_STEPS; i++) {
+      const n = document.createElement('div');
+      n.className = 'step-num' + (i % 4 === 0 ? ' beat' : '');
+      n.textContent = i + 1;
+      numbersRow.appendChild(n);
+    }
+
+    // note row
+    addRow('note', (i) => {
+      const s = steps[i];
+      const el = document.createElement('div');
+      el.className = 'step ' + (s.rest ? 'rest' : 'note');
+      if (!s.rest && s.oct === 1) el.classList.add('octup');
+      if (!s.rest && s.oct === -1) el.classList.add('octdn');
+      el.textContent = s.rest ? '·' : NOTE_NAMES[s.pitch];
+      el.addEventListener('click', (e) => {
+        if (e.altKey) {
+          s.rest = !s.rest;
+        } else if (e.metaKey || e.ctrlKey) {
+          if (s.rest) { s.rest = false; }
+          s.oct = s.oct === 1 ? -1 : (s.oct === -1 ? 0 : 1);
+        } else {
+          if (s.rest) { s.rest = false; s.pitch = 0; }
+          else { s.pitch = (s.pitch + (e.shiftKey ? -1 : 1) + 12) % 12; }
+        }
+        render();
+      });
+      return el;
+    });
+
+    // accent row
+    addToggleRow('acc', 'accent', 'A');
+    addToggleRow('slide', 'slide', 'S');
+    addToggleRow('gate', 'gate', 'G');
+
+    highlightActive();
+  }
+
+  function addRow(label, build) {
+    const lbl = document.createElement('div');
+    lbl.className = 'seq-row-label';
+    lbl.textContent = label;
+    seqGrid.appendChild(lbl);
+    for (let i = 0; i < NUM_STEPS; i++) {
+      const el = build(i);
+      el.dataset.idx = i;
+      el.dataset.row = label;
+      seqGrid.appendChild(el);
+    }
+  }
+  function addToggleRow(label, key, char) {
+    addRow(label, (i) => {
+      const s = steps[i];
+      const el = document.createElement('div');
+      el.className = 'step toggle ' + key + (s[key] ? ' on ' + key : '');
+      el.textContent = s[key] ? char : '';
+      el.addEventListener('click', () => { s[key] = !s[key]; render(); });
+      return el;
+    });
+  }
+
+  function highlightActive() {
+    const idx = currentStep;
+    document.querySelectorAll('.step').forEach(el => {
+      el.classList.remove('active');
+      if (parseInt(el.dataset.idx, 10) === idx && el.dataset.row === 'note') {
+        el.classList.add('active');
+      }
+    });
+  }
+
+  // --- voice (303-style) ---
+  // Two cascaded biquad lowpass filters approximate ~24dB/oct.
+  // Filter envelope: fast attack, exponential decay back to base cutoff.
+  // Slide: portamento via linearRamp on osc.frequency.
+
+  function noteToFreq(s) {
+    // base C2 = 65.41 Hz. step.pitch is 0..11, oct -1..1.
+    const base = 65.41 * Math.pow(2, s.oct);
+    const semis = s.pitch + params.tuning / 100;
+    return base * Math.pow(2, semis / 12);
+  }
+
+  let activeVoice = null; // { osc, vca, filt1, filt2, freq, endTime }
+
+  function triggerStep(stepIndex, time, durSec) {
+    const s = steps[stepIndex];
+    if (s.rest || !s.gate) return;
+    const freq = noteToFreq(s);
+
+    // determine slide: slide flag on this step makes IT slide INTO the next step.
+    // Standard 303 behavior: a step with slide ON glides to the next note without retriggering envelope.
+    // We implement: if previous step had slide on AND current step is not rest, reuse oscillator.
+    const prev = steps[(stepIndex - 1 + NUM_STEPS) % NUM_STEPS];
+    const slidingIn = prev && !prev.rest && prev.slide && activeVoice && activeVoice.endTime > time - 0.01;
+
+    const wave = document.getElementById('wave').value;
+
+    if (slidingIn) {
+      // Glide pitch
+      const slideTime = Math.min(0.06, durSec * 0.6);
+      activeVoice.osc.frequency.cancelScheduledValues(time);
+      activeVoice.osc.frequency.setValueAtTime(activeVoice.freq, time);
+      activeVoice.osc.frequency.linearRampToValueAtTime(freq, time + slideTime);
+      activeVoice.freq = freq;
+      activeVoice.endTime = time + durSec + 0.05;
+      // do NOT retrigger envelope on slide-in
+    } else {
+      stopVoice(time);
+
+      const osc = ac.createOscillator();
+      osc.type = wave;
+      osc.frequency.setValueAtTime(freq, time);
+
+      const filt1 = ac.createBiquadFilter();
+      const filt2 = ac.createBiquadFilter();
+      filt1.type = 'lowpass';
+      filt2.type = 'lowpass';
+      // resonance only on first stage (303-like); second adds slope
+      const Q = 0.7 + params.resonance * 22; // 0..0.99 → 0.7..22.4
+      filt1.Q.value = Q;
+      filt2.Q.value = 0.5;
+
+      const vca = ac.createGain();
+      vca.gain.value = 0;
+
+      osc.connect(filt1);
+      filt1.connect(filt2);
+      filt2.connect(vca);
+      vca.connect(driveNode);
+
+      osc.start(time);
+
+      // envelope
+      const isAccent = !!s.accent;
+      const accentBoost = isAccent ? params.accent : 0;
+      const baseCutoff = params.cutoff;
+      const envAmount = params.envmod * (4500 + accentBoost * 5000); // hz peak above base
+      const peak = Math.min(12000, baseCutoff + envAmount);
+      const decayT = params.decay * (isAccent ? 0.7 : 1.0); // accent shortens decay slightly
+
+      filt1.frequency.setValueAtTime(peak, time);
+      filt1.frequency.exponentialRampToValueAtTime(Math.max(60, baseCutoff), time + decayT);
+      filt2.frequency.setValueAtTime(peak * 1.2, time);
+      filt2.frequency.exponentialRampToValueAtTime(Math.max(60, baseCutoff * 1.2), time + decayT);
+
+      // resonance bump on accent
+      if (isAccent) {
+        const Qa = Q + 6 + params.accent * 8;
+        filt1.Q.setValueAtTime(Qa, time);
+        filt1.Q.exponentialRampToValueAtTime(Math.max(0.7, Q), time + decayT * 0.8);
+      }
+
+      // amp envelope
+      const amp = isAccent ? 0.85 + 0.3 * params.accent : 0.55;
+      vca.gain.setValueAtTime(0, time);
+      vca.gain.linearRampToValueAtTime(amp, time + 0.003);
+      // hold for the gate duration of this step (slide will keep it ringing)
+      const gateOff = time + durSec * 0.92;
+      vca.gain.setValueAtTime(amp, gateOff);
+      vca.gain.exponentialRampToValueAtTime(0.0001, gateOff + 0.04);
+
+      const endTime = gateOff + 0.06;
+      osc.stop(endTime + 0.02);
+
+      activeVoice = { osc, vca, filt1, filt2, freq, endTime };
+    }
+
+    // if THIS step has slide, extend voice's endTime so the next call can reuse it
+    if (s.slide && activeVoice) {
+      activeVoice.endTime = time + durSec + 0.1;
+      // override the gate-off so it doesn't cut before the slide
+      activeVoice.vca.gain.cancelScheduledValues(time + durSec * 0.5);
+      const amp = s.accent ? 0.85 + 0.3 * params.accent : 0.55;
+      activeVoice.vca.gain.setValueAtTime(amp, time + durSec * 0.99);
+    }
+  }
+
+  function stopVoice(time) {
+    if (!activeVoice) return;
+    const v = activeVoice;
+    try {
+      v.vca.gain.cancelScheduledValues(time);
+      v.vca.gain.setValueAtTime(v.vca.gain.value, time);
+      v.vca.gain.exponentialRampToValueAtTime(0.0001, time + 0.02);
+      v.osc.stop(time + 0.03);
+    } catch (e) {}
+    activeVoice = null;
+  }
+
+  // --- scheduler ---
+  let playing = false;
+  let currentStep = 0;
+  let nextNoteTime = 0;
+  const lookahead = 25; // ms
+  const scheduleAhead = 0.1; // s
+  let timerId = null;
+
+  function stepDuration() {
+    const tempo = parseFloat(document.getElementById('tempo').value);
+    return (60 / tempo) / 4; // 16th notes
+  }
+
+  function schedule() {
+    while (nextNoteTime < ac.currentTime + scheduleAhead) {
+      const dur = stepDuration();
+      triggerStep(currentStep, nextNoteTime, dur);
+      // schedule UI flash
+      const flashIdx = currentStep;
+      const flashAt = nextNoteTime;
+      const ms = Math.max(0, (flashAt - ac.currentTime) * 1000);
+      setTimeout(() => flashStep(flashIdx), ms);
+      currentStep = (currentStep + 1) % NUM_STEPS;
+      nextNoteTime += dur;
+    }
+  }
+
+  function flashStep(i) {
+    document.querySelectorAll('.step').forEach(el => el.classList.remove('flash'));
+    const noteSteps = document.querySelectorAll('.step[data-row="note"]');
+    if (noteSteps[i]) {
+      noteSteps[i].classList.add('flash');
+      setTimeout(() => noteSteps[i].classList.remove('flash'), 80);
+    }
+  }
+
+  function play() {
+    ensureAudio();
+    if (ac.state === 'suspended') ac.resume();
+    playing = true;
+    currentStep = 0;
+    nextNoteTime = ac.currentTime + 0.05;
+    document.getElementById('playBtn').textContent = 'stop';
+    document.getElementById('playBtn').classList.add('playing');
+    document.getElementById('status').textContent = 'playing';
+    timerId = setInterval(schedule, lookahead);
+  }
+  function stop() {
+    playing = false;
+    clearInterval(timerId);
+    if (ac) stopVoice(ac.currentTime);
+    document.getElementById('playBtn').textContent = 'play';
+    document.getElementById('playBtn').classList.remove('playing');
+    document.getElementById('status').textContent = 'stopped';
+    document.querySelectorAll('.step.flash').forEach(el => el.classList.remove('flash'));
+  }
+
+  document.getElementById('playBtn').addEventListener('click', () => {
+    if (playing) stop(); else play();
+  });
+
+  document.getElementById('drive').addEventListener('change', (e) => {
+    if (driveNode) setDrive(parseInt(e.target.value, 10));
+  });
+
+  // --- presets ---
+  // helper: parse compact pattern strings.
+  // each step is "P[oct][a][s]" or "." for rest. P is note 0-11 in hex (0..b), oct +/- prefix.
+  function pat(str) {
+    const tokens = str.trim().split(/\s+/);
+    const out = Array.from({ length: NUM_STEPS }, emptyStep);
+    for (let i = 0; i < Math.min(tokens.length, NUM_STEPS); i++) {
+      const t = tokens[i];
+      if (t === '.') continue;
+      const m = t.match(/^([+-]?)([0-9ab])([as]*)$/i);
+      if (!m) continue;
+      const oct = m[1] === '+' ? 1 : m[1] === '-' ? -1 : 0;
+      const pitch = parseInt(m[2], 16);
+      out[i] = {
+        rest: false, pitch, oct,
+        accent: m[3].includes('a'),
+        slide: m[3].includes('s'),
+        gate: true,
+      };
+    }
+    return out;
+  }
+
+  const presets = {
+    acid1: {
+      name: 'acid 1',
+      steps: pat('0 . 0 +0a 0 . 0s 7 . 3 0 . +0a . 0 ts'.replace('ts','s')),
+      params: { cutoff: 420, resonance: 0.85, envmod: 0.7, decay: 0.32, accent: 0.7, tuning: 0 }
+    },
+    acid2: {
+      name: 'acid 2',
+      steps: pat('0 0a 3 0s 5 . 7 +0a 0 . 3s 5 . 7a 5 3'),
+      params: { cutoff: 380, resonance: 0.92, envmod: 0.85, decay: 0.4, accent: 0.8, tuning: 0 }
+    },
+    rolling: {
+      name: 'rolling',
+      steps: pat('0 0 7 0 5 0 7 0a 0 0s 3 0 7 0 5a 0'),
+      params: { cutoff: 500, resonance: 0.78, envmod: 0.6, decay: 0.22, accent: 0.6, tuning: 0 }
+    },
+    dub: {
+      name: 'dub',
+      steps: pat('0 . . . 7 . . . 5 . . 0s . . 3a .'),
+      params: { cutoff: 260, resonance: 0.7, envmod: 0.45, decay: 0.7, accent: 0.5, tuning: 0 }
+    },
+    clear: {
+      name: 'clear',
+      steps: Array.from({ length: NUM_STEPS }, emptyStep),
+      params: null
+    },
+  };
+
+  document.querySelectorAll('[data-preset]').forEach(b => {
+    b.addEventListener('click', () => {
+      const p = presets[b.dataset.preset];
+      steps = p.steps.map(s => ({ ...s }));
+      if (p.params) {
+        Object.assign(params, p.params);
+        Object.keys(paramRanges).forEach(refreshKnob);
+      }
+      render();
+    });
+  });
+
+  // --- init ---
+  // load acid 1 by default
+  steps = presets.acid1.steps.map(s => ({ ...s }));
+  render();
+
+  // spacebar play/stop
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
+      e.preventDefault();
+      if (playing) stop(); else play();
+    }
+  });
+})();
+</script>
+</body>
+</html>

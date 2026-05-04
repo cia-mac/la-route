@@ -1,0 +1,999 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>drone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap">
+<style>
+  :root {
+    --bg: #0e0e10;
+    --panel: #16161a;
+    --panel-2: #1d1d22;
+    --line: #28282f;
+    --ink: #e8e8ea;
+    --muted: #6e6e78;
+    --accent: #ff6a1a;
+    --ok: #7dd87d;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+  }
+
+  /* tooltip */
+  [data-tip] { position: relative; }
+  [data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0a0a0c;
+    border: 1px solid var(--accent);
+    color: var(--ink);
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    white-space: normal;
+    width: max-content;
+    max-width: 280px;
+    text-align: left;
+    line-height: 1.55;
+    z-index: 1000;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+    pointer-events: none;
+  }
+  [data-tip]:hover::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 3px);
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--accent);
+    z-index: 1000;
+    pointer-events: none;
+  }
+  .app { max-width: 1100px; margin: 0 auto; padding: 28px 24px 60px; }
+  header {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 24px; padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  h1 {
+    margin: 0; font-size: 16px; letter-spacing: 0.18em;
+    text-transform: uppercase; font-weight: 500;
+  }
+  h1 .dot { color: var(--accent); }
+  .meta { color: var(--muted); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  nav.devnav { display: flex; gap: 4px; margin-bottom: 18px; }
+  nav.devnav a {
+    padding: 10px 16px; font-size: 12px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--muted); text-decoration: none;
+    border: 1px solid var(--line); border-radius: 4px;
+    background: var(--panel);
+  }
+  nav.devnav a.active { color: var(--ink); border-color: var(--accent); }
+  nav.devnav a:hover { color: var(--ink); }
+
+  .panel {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 6px; padding: 18px 20px; margin-bottom: 16px;
+  }
+  .panel h2 {
+    margin: 0 0 16px; font-size: 12px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--muted); font-weight: 500;
+  }
+
+  .sliders {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 18px 36px;
+  }
+  .slider { display: flex; flex-direction: column; gap: 6px; }
+  .slider .head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .slider .label {
+    font-size: 12px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .slider .value { font-size: 13px; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .slider input[type="range"] {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 4px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 2px; outline: none; cursor: pointer;
+  }
+  .slider input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%; background: var(--accent);
+    border: 2px solid #0a0a0a; cursor: grab;
+  }
+  .slider input[type="range"]::-webkit-slider-thumb:active { cursor: grabbing; }
+  .slider input[type="range"]::-moz-range-thumb {
+    width: 16px; height: 16px;
+    border-radius: 50%; background: var(--accent);
+    border: 2px solid #0a0a0a;
+  }
+
+  .row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .field {
+    display: flex; align-items: center; gap: 10px;
+    color: var(--muted); font-size: 12px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+  }
+  .field select {
+    background: var(--panel-2); border: 1px solid var(--line);
+    color: var(--ink); font: inherit; font-size: 13px;
+    padding: 8px 12px; border-radius: 3px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  button.btn {
+    background: var(--panel-2); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 4px;
+    padding: 10px 16px; font: inherit; font-size: 13px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    cursor: pointer;
+  }
+  button.btn:hover { border-color: var(--muted); }
+  button.btn.primary {
+    background: var(--accent); color: #0a0a0a;
+    border-color: var(--accent); font-weight: 600;
+  }
+  button.btn.primary.playing {
+    background: var(--ok); border-color: var(--ok);
+  }
+  .preset-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .spacer { flex: 1; }
+  .hint {
+    color: var(--muted); font-size: 12px;
+    letter-spacing: 0.04em; line-height: 1.6; margin-top: 14px;
+  }
+
+  .meter {
+    width: 160px; height: 6px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 2px; overflow: hidden;
+    position: relative;
+  }
+  .meter .fill {
+    position: absolute; top: 0; left: 0; bottom: 0;
+    width: 0%; background: linear-gradient(90deg, var(--ok), var(--accent), #ff3030);
+    transition: width 60ms linear;
+  }
+
+  /* === refined surface — Inter, lowercase, lighter chrome === */
+  :root { --accent: #e85d1a; --line: #1f1f24; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI Variable', sans-serif;
+    font-weight: 300;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+  h1, .panel h2, .slider .label, .slider .value, .field, button.btn,
+  nav.devnav a, .meta, .hint, .field select {
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  h1 { font-weight: 400; }
+  .panel h2 { font-weight: 400; opacity: 0.6; }
+  .slider .label { font-weight: 300; opacity: 0.85; }
+  .slider .value { font-weight: 400; font-variant-numeric: tabular-nums; }
+  .field { font-weight: 300; opacity: 0.85; }
+  nav.devnav a { font-weight: 400; }
+  button.btn { font-weight: 400; }
+  button.btn.primary { font-weight: 500; }
+  .meta { font-weight: 400; opacity: 0.7; }
+  .hint { font-weight: 300; opacity: 0.7; }
+
+  .slider input[type="range"]::-webkit-slider-thumb {
+    width: 14px; height: 14px;
+    border: none;
+    box-shadow: 0 0 0 2px var(--bg);
+  }
+  .slider input[type="range"]::-moz-range-thumb {
+    width: 14px; height: 14px;
+    border: none;
+    box-shadow: 0 0 0 2px var(--bg);
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>drone<span class="dot">·</span>field</h1>
+    <div class="row" style="gap: 14px;">
+      <div class="meter"><div class="fill" id="meterFill"></div></div>
+      <div class="meta" id="status">stopped</div>
+    </div>
+  </header>
+
+  <nav class="devnav">
+    <a href="index.html">acid · 303</a>
+    <a href="drone.html" class="active">drone</a>
+    <a href="ritual.html">ritual</a>
+    <a href="studio.html">studio</a>
+  </nav>
+
+  <div class="panel">
+    <h2>pitch</h2>
+    <div class="row">
+      <div class="field" data-tip="Root note of the chord. Changes apply live with a smooth crossfade.">
+        <span>root</span>
+        <select id="root">
+          <option value="0">C</option>
+          <option value="1">C#</option>
+          <option value="2" selected>D</option>
+          <option value="3">D#</option>
+          <option value="4">E</option>
+          <option value="5">F</option>
+          <option value="6">F#</option>
+          <option value="7">G</option>
+          <option value="8">G#</option>
+          <option value="9">A</option>
+          <option value="10">A#</option>
+          <option value="11">B</option>
+        </select>
+      </div>
+      <div class="field" data-tip="Octave register. Lower = darker, more sub-heavy.">
+        <span>octave</span>
+        <select id="octave">
+          <option value="1">1</option>
+          <option value="2" selected>2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+        </select>
+      </div>
+      <div class="field" data-tip="Chord shape. Unison = one voice. Octave = root + octave. Triads, sevenths, and bell-like wide voicings available.">
+        <span>voicing</span>
+        <select id="voicing">
+          <option value="unison">unison</option>
+          <option value="octave" selected>octave</option>
+          <option value="fifth">fifth</option>
+          <option value="fifthoct">fifth + oct</option>
+          <option value="sus2">sus2</option>
+          <option value="sus4">sus4</option>
+          <option value="minor">minor triad</option>
+          <option value="major">major triad</option>
+          <option value="m7">minor 7</option>
+          <option value="maj7">major 7</option>
+          <option value="cluster">cluster</option>
+          <option value="bell">bell (1·8·12)</option>
+        </select>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn primary" id="playBtn" data-tip="Start / stop the drone. Fade-in time is set by the attack slider. Spacebar also works.">play</button>
+    </div>
+    <div class="hint">All controls update live, including pitch (smooth crossfade).</div>
+  </div>
+
+  <div class="panel">
+    <h2>character</h2>
+    <div class="row">
+      <div class="field" data-tip="Oscillator shape. Saw = bright and full. Square = hollow. Triangle = soft. Sine = pure.">
+        <span>wave</span>
+        <select id="wave">
+          <option value="sawtooth" selected>saw</option>
+          <option value="square">square</option>
+          <option value="triangle">triangle</option>
+          <option value="sine">sine</option>
+        </select>
+      </div>
+      <div class="field" data-tip="Filter type. Lowpass cuts highs. Bandpass keeps a band. Highpass cuts lows. Notch carves a hole.">
+        <span>filter</span>
+        <select id="filter">
+          <option value="lowpass" selected>lowpass</option>
+          <option value="bandpass">bandpass</option>
+          <option value="highpass">highpass</option>
+          <option value="notch">notch</option>
+        </select>
+      </div>
+      <div class="field" data-tip="Shape of the LFO that sweeps the filter. Sine = smooth waves. Square = stepped. Saw = ramp.">
+        <span>shape</span>
+        <select id="lfoshape">
+          <option value="sine" selected>sine</option>
+          <option value="triangle">triangle</option>
+          <option value="square">square</option>
+          <option value="sawtooth">saw</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>voice</h2>
+    <div class="sliders">
+      <div class="slider" data-param="detune" data-tip="Spreads the four oscillators apart in cents. More = thicker, more chorus-like.">
+        <div class="head"><span class="label">detune</span><span class="value">15 ct</span></div>
+        <input type="range" min="0" max="1000" value="300" />
+      </div>
+      <div class="slider" data-param="drift" data-tip="Each oscillator wanders slowly and independently. Adds organic, breathing movement.">
+        <div class="head"><span class="label">drift</span><span class="value">40%</span></div>
+        <input type="range" min="0" max="1000" value="400" />
+      </div>
+      <div class="slider" data-param="wobble" data-tip="Slow, tape-style pitch modulation across all voices together. Adds vintage instability.">
+        <div class="head"><span class="label">wobble</span><span class="value">25%</span></div>
+        <input type="range" min="0" max="1000" value="250" />
+      </div>
+      <div class="slider" data-param="sub" data-tip="Sine wave one octave below each voice. Adds weight and low-end body.">
+        <div class="head"><span class="label">sub</span><span class="value">50%</span></div>
+        <input type="range" min="0" max="1000" value="500" />
+      </div>
+      <div class="slider" data-param="noise" data-tip="Bandpass-filtered noise layer. Adds breath, air, and texture.">
+        <div class="head"><span class="label">noise</span><span class="value">15%</span></div>
+        <input type="range" min="0" max="1000" value="150" />
+      </div>
+      <div class="slider" data-param="width" data-tip="Spreads the chord notes across the stereo field. 0% = mono. 100% = maximum spread.">
+        <div class="head"><span class="label">width</span><span class="value">60%</span></div>
+        <input type="range" min="0" max="1000" value="600" />
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>tone</h2>
+    <div class="sliders">
+      <div class="slider" data-param="brightness" data-tip="Filter cutoff frequency. Low = dark and underwater. High = open and airy.">
+        <div class="head"><span class="label">cutoff</span><span class="value">1200 hz</span></div>
+        <input type="range" min="0" max="1000" value="500" />
+      </div>
+      <div class="slider" data-param="resonance" data-tip="Emphasizes the cutoff frequency. High resonance gives a vocal, throaty quality.">
+        <div class="head"><span class="label">reso</span><span class="value">20%</span></div>
+        <input type="range" min="0" max="1000" value="200" />
+      </div>
+      <div class="slider" data-param="warmth" data-tip="Soft tube-style saturation. Adds harmonic richness and warmth.">
+        <div class="head"><span class="label">warmth</span><span class="value">30%</span></div>
+        <input type="range" min="0" max="1000" value="300" />
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>movement</h2>
+    <div class="sliders">
+      <div class="slider" data-param="rate" data-tip="Speed of the filter LFO. Slow = gentle breathing. Fast = vibrato-like wobble.">
+        <div class="head"><span class="label">rate</span><span class="value">0.15 hz</span></div>
+        <input type="range" min="0" max="1000" value="500" />
+      </div>
+      <div class="slider" data-param="depth" data-tip="How far the LFO sweeps the filter cutoff. 0% = static. 100% = maximum sweep.">
+        <div class="head"><span class="label">depth</span><span class="value">50%</span></div>
+        <input type="range" min="0" max="1000" value="500" />
+      </div>
+      <div class="slider" data-param="shimmer" data-tip="Three-tap modulated chorus. Adds shimmering ensemble thickness.">
+        <div class="head"><span class="label">shimmer</span><span class="value">40%</span></div>
+        <input type="range" min="0" max="1000" value="400" />
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>output</h2>
+    <div class="sliders">
+      <div class="slider" data-param="space" data-tip="Convolution reverb mix. Wet = vast room. Dry = upfront and intimate.">
+        <div class="head"><span class="label">space</span><span class="value">60%</span></div>
+        <input type="range" min="0" max="1000" value="600" />
+      </div>
+      <div class="slider" data-param="attack" data-tip="Fade-in time when you press play. Long = gradual, ritualistic. Short = immediate. Also sets the release.">
+        <div class="head"><span class="label">attack</span><span class="value">4.0 s</span></div>
+        <input type="range" min="0" max="1000" value="400" />
+      </div>
+      <div class="slider" data-param="volume" data-tip="Master output level.">
+        <div class="head"><span class="label">volume</span><span class="value">70%</span></div>
+        <input type="range" min="0" max="1000" value="700" />
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>presets</h2>
+    <div class="preset-row">
+      <button class="btn" data-preset="cathedral" data-tip="Wide, bright, fifth + octave with lots of shimmer. Like a tall stone room.">cathedral</button>
+      <button class="btn" data-preset="deepspace" data-tip="Deep low-octave drone. Soft, slow, vast.">deep space</button>
+      <button class="btn" data-preset="warmpad" data-tip="Bright major triad pad. Mid attack, gentle motion.">warm pad</button>
+      <button class="btn" data-preset="evolving" data-tip="Sus2 voicing with heavy drift. Constantly shifting, never the same twice.">evolving</button>
+      <button class="btn" data-preset="subterranean" data-tip="Ultra-low, sub-heavy, quiet. Felt more than heard.">subterranean</button>
+      <button class="btn" data-preset="bell" data-tip="Triangle waves through bandpass — bell-like, with a wide spread voicing.">bell field</button>
+      <button class="btn" data-preset="windworn" data-tip="Cluster intervals with heavy noise and wobble. Eroded, weathered.">wind-worn</button>
+      <button class="btn" data-preset="vault" data-tip="Square-wave fifth, dry, low. Hollow industrial chamber.">vault</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // --- params ---
+  const params = {
+    detune: 15, drift: 0.4, wobble: 0.25,
+    sub: 0.5, noise: 0.15, width: 0.6,
+    brightness: 1200, resonance: 0.2, warmth: 0.3,
+    rate: 0.15, depth: 0.5, shimmer: 0.4,
+    space: 0.6, attack: 4.0, volume: 0.7,
+  };
+  const ranges = {
+    detune:     { min: 0,    max: 50,   fmt: v => `${Math.round(v)} ct` },
+    drift:      { min: 0,    max: 1,    fmt: v => `${Math.round(v*100)}%` },
+    wobble:     { min: 0,    max: 1,    fmt: v => `${Math.round(v*100)}%` },
+    sub:        { min: 0,    max: 1,    fmt: v => `${Math.round(v*100)}%` },
+    noise:      { min: 0,    max: 1,    fmt: v => `${Math.round(v*100)}%` },
+    width:      { min: 0,    max: 1,    fmt: v => `${Math.round(v*100)}%` },
+    brightness: { min: 80,   max: 8000, log: true, fmt: v => `${Math.round(v)} hz` },
+    resonance:  { min: 0,    max: 0.85, fmt: v => `${Math.round(v*100)}%` },
+    warmth:     { min: 0,    max: 1,    fmt: v => `${Math.round(v*100)}%` },
+    rate:       { min: 0.02, max: 2,    log: true, fmt: v => `${v.toFixed(2)} hz` },
+    depth:      { min: 0,    max: 1,    fmt: v => `${Math.round(v*100)}%` },
+    shimmer:    { min: 0,    max: 1,    fmt: v => `${Math.round(v*100)}%` },
+    space:      { min: 0,    max: 1,    fmt: v => `${Math.round(v*100)}%` },
+    attack:     { min: 0.5,  max: 15,   fmt: v => `${v.toFixed(1)} s` },
+    volume:     { min: 0,    max: 1,    fmt: v => `${Math.round(v*100)}%` },
+  };
+
+  function paramToSlider(name) {
+    const r = ranges[name];
+    let t;
+    if (r.log) {
+      t = (Math.log(params[name]) - Math.log(r.min)) / (Math.log(r.max) - Math.log(r.min));
+    } else {
+      t = (params[name] - r.min) / (r.max - r.min);
+    }
+    return Math.round(Math.max(0, Math.min(1, t)) * 1000);
+  }
+  function sliderToParam(name, v) {
+    const r = ranges[name];
+    const t = v / 1000;
+    if (r.log) return Math.exp(Math.log(r.min) + t * (Math.log(r.max) - Math.log(r.min)));
+    return r.min + t * (r.max - r.min);
+  }
+  function refreshSlider(name) {
+    const el = document.querySelector(`.slider[data-param="${name}"]`);
+    if (!el) return;
+    el.querySelector('input').value = paramToSlider(name);
+    el.querySelector('.value').textContent = ranges[name].fmt(params[name]);
+  }
+  Object.keys(ranges).forEach(refreshSlider);
+
+  document.querySelectorAll('.slider[data-param]').forEach(el => {
+    const name = el.dataset.param;
+    const input = el.querySelector('input');
+    input.addEventListener('input', () => {
+      params[name] = sliderToParam(name, parseFloat(input.value));
+      el.querySelector('.value').textContent = ranges[name].fmt(params[name]);
+      updateLive();
+    });
+  });
+
+  // selectors
+  document.getElementById('wave').addEventListener('change', () => {
+    if (!ac) return;
+    const w = document.getElementById('wave').value;
+    state.voices.forEach(v => v.oscs.forEach(o => o.osc.type = w));
+  });
+  document.getElementById('filter').addEventListener('change', () => {
+    if (!ac) return;
+    const t = document.getElementById('filter').value;
+    state.filt1.type = t;
+    state.filt2.type = t;
+  });
+  document.getElementById('lfoshape').addEventListener('change', () => {
+    if (!ac) return;
+    state.motionLfo.type = document.getElementById('lfoshape').value;
+  });
+  ['root','octave','voicing'].forEach(id => {
+    document.getElementById(id).addEventListener('change', () => {
+      if (state.playing) applyPitchLive();
+    });
+  });
+
+  // --- audio graph ---
+  let ac = null;
+  const state = {
+    playing: false,
+    voices: [],
+    voicesBus: null,
+    chorus: null,
+    filt1: null, filt2: null,
+    motionLfo: null, motionGain: null,
+    wobbleLfo: null, wobbleScale: null,
+    dryGain: null, reverbSend: null, convolver: null, reverbReturn: null,
+    saturator: null, master: null, out: null,
+    noiseSrc: null, noiseFilter: null, noiseGain: null,
+    analyser: null,
+  };
+
+  function makeImpulse(seconds, decay) {
+    const rate = ac.sampleRate;
+    const length = Math.floor(rate * seconds);
+    const impulse = ac.createBuffer(2, length, rate);
+    for (let c = 0; c < 2; c++) {
+      const data = impulse.getChannelData(c);
+      for (let i = 0; i < length; i++) {
+        const t = i / length;
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, decay);
+      }
+    }
+    return impulse;
+  }
+  function makeSatCurve(amount) {
+    const n = 1024; const curve = new Float32Array(n);
+    const k = amount * 25 + 0.0001;
+    for (let i = 0; i < n; i++) {
+      const x = (i * 2) / n - 1;
+      curve[i] = Math.tanh(k * x) / Math.tanh(k);
+    }
+    return curve;
+  }
+  function makeNoiseBuffer(seconds) {
+    const length = Math.floor(ac.sampleRate * seconds);
+    const buf = ac.createBuffer(2, length, ac.sampleRate);
+    for (let c = 0; c < 2; c++) {
+      const data = buf.getChannelData(c);
+      for (let i = 0; i < length; i++) data[i] = Math.random() * 2 - 1;
+    }
+    return buf;
+  }
+  function makeChorus() {
+    const input = ac.createGain();
+    const dry = ac.createGain();
+    const wet = ac.createGain();
+    const out = ac.createGain();
+    dry.gain.value = 1 - params.shimmer * 0.4;
+    wet.gain.value = params.shimmer * 0.6;
+    input.connect(dry); dry.connect(out);
+    const d1 = ac.createDelay(0.1); d1.delayTime.value = 0.011;
+    const d2 = ac.createDelay(0.1); d2.delayTime.value = 0.019;
+    const d3 = ac.createDelay(0.1); d3.delayTime.value = 0.027;
+    const lfo1 = ac.createOscillator(); lfo1.frequency.value = 0.27;
+    const lfo2 = ac.createOscillator(); lfo2.frequency.value = 0.43;
+    const lfo3 = ac.createOscillator(); lfo3.frequency.value = 0.61;
+    const dg1 = ac.createGain(); dg1.gain.value = 0.003;
+    const dg2 = ac.createGain(); dg2.gain.value = 0.005;
+    const dg3 = ac.createGain(); dg3.gain.value = 0.004;
+    lfo1.connect(dg1); dg1.connect(d1.delayTime);
+    lfo2.connect(dg2); dg2.connect(d2.delayTime);
+    lfo3.connect(dg3); dg3.connect(d3.delayTime);
+    lfo1.start(); lfo2.start(); lfo3.start();
+    input.connect(d1); input.connect(d2); input.connect(d3);
+    d1.connect(wet); d2.connect(wet); d3.connect(wet);
+    wet.connect(out);
+    return { input, output: out, dryGain: dry, wetGain: wet };
+  }
+
+  function ensureAudio() {
+    if (ac) return;
+    ac = new (window.AudioContext || window.webkitAudioContext)();
+
+    state.master = ac.createGain(); state.master.gain.value = 0;
+    state.out = ac.createGain(); state.out.gain.value = 1;
+
+    state.saturator = ac.createWaveShaper();
+    state.saturator.oversample = '4x';
+    state.saturator.curve = makeSatCurve(params.warmth);
+
+    state.filt1 = ac.createBiquadFilter();
+    state.filt1.type = document.getElementById('filter').value;
+    state.filt1.frequency.value = params.brightness;
+    state.filt1.Q.value = 0.7 + params.resonance * 14;
+
+    state.filt2 = ac.createBiquadFilter();
+    state.filt2.type = document.getElementById('filter').value;
+    state.filt2.frequency.value = params.brightness * 1.3;
+    state.filt2.Q.value = 0.7;
+
+    state.chorus = makeChorus();
+
+    state.dryGain = ac.createGain();
+    state.dryGain.gain.value = 1 - params.space * 0.4;
+
+    state.reverbSend = ac.createGain();
+    state.reverbSend.gain.value = params.space * 0.7;
+
+    state.convolver = ac.createConvolver();
+    state.convolver.buffer = makeImpulse(6.5, 2.0);
+
+    state.reverbReturn = ac.createGain();
+    state.reverbReturn.gain.value = 1;
+
+    state.voicesBus = ac.createGain();
+    state.voicesBus.gain.value = 1;
+
+    // routing
+    state.voicesBus.connect(state.chorus.input);
+    state.chorus.output.connect(state.saturator);
+    state.saturator.connect(state.filt1);
+    state.filt1.connect(state.filt2);
+    state.filt2.connect(state.dryGain);
+    state.filt2.connect(state.reverbSend);
+    state.reverbSend.connect(state.convolver);
+    state.convolver.connect(state.reverbReturn);
+    state.dryGain.connect(state.master);
+    state.reverbReturn.connect(state.master);
+    state.master.connect(state.out);
+    state.out.connect(ac.destination);
+
+    // motion LFO on filter cutoff
+    state.motionLfo = ac.createOscillator();
+    state.motionLfo.type = document.getElementById('lfoshape').value;
+    state.motionLfo.frequency.value = params.rate;
+    state.motionGain = ac.createGain();
+    state.motionGain.gain.value = params.brightness * params.depth * 0.6;
+    state.motionLfo.connect(state.motionGain);
+    state.motionGain.connect(state.filt1.frequency);
+    state.motionLfo.start();
+
+    // tape wobble — slow global LFO modulating all osc detune
+    state.wobbleLfo = ac.createOscillator();
+    state.wobbleLfo.type = 'sine';
+    state.wobbleLfo.frequency.value = 0.31;
+    state.wobbleScale = ac.createGain();
+    state.wobbleScale.gain.value = params.wobble * 22;
+    state.wobbleLfo.connect(state.wobbleScale);
+    state.wobbleLfo.start();
+
+    // noise layer
+    state.noiseSrc = ac.createBufferSource();
+    state.noiseSrc.buffer = makeNoiseBuffer(3);
+    state.noiseSrc.loop = true;
+    state.noiseFilter = ac.createBiquadFilter();
+    state.noiseFilter.type = 'bandpass';
+    state.noiseFilter.frequency.value = 1200;
+    state.noiseFilter.Q.value = 0.8;
+    state.noiseGain = ac.createGain();
+    state.noiseGain.gain.value = 0;
+    state.noiseSrc.connect(state.noiseFilter);
+    state.noiseFilter.connect(state.noiseGain);
+    state.noiseGain.connect(state.voicesBus);
+    state.noiseSrc.start();
+
+    // analyser for meter
+    state.analyser = ac.createAnalyser();
+    state.analyser.fftSize = 1024;
+    state.master.connect(state.analyser);
+    startMeter();
+  }
+
+  function startMeter() {
+    const buf = new Float32Array(state.analyser.fftSize);
+    const fillEl = document.getElementById('meterFill');
+    let smoothed = 0;
+    function tick() {
+      state.analyser.getFloatTimeDomainData(buf);
+      let peak = 0;
+      for (let i = 0; i < buf.length; i++) {
+        const v = Math.abs(buf[i]);
+        if (v > peak) peak = v;
+      }
+      smoothed = Math.max(peak, smoothed * 0.85);
+      fillEl.style.width = Math.min(100, smoothed * 110) + '%';
+      requestAnimationFrame(tick);
+    }
+    tick();
+  }
+
+  // --- voicings ---
+  const voicings = {
+    unison:   [0],
+    octave:   [0, 12],
+    fifth:    [0, 7],
+    fifthoct: [0, 7, 12],
+    sus2:     [0, 2, 7],
+    sus4:     [0, 5, 7],
+    minor:    [0, 3, 7],
+    major:    [0, 4, 7],
+    m7:       [0, 3, 7, 10],
+    maj7:     [0, 4, 7, 11],
+    cluster:  [0, 1, 7],
+    bell:     [0, 12, 19],
+  };
+
+  function makeVoice(baseFreq, panValue) {
+    const v = { oscs: [], extra: [], baseFreq };
+    const sum = ac.createGain();
+    sum.gain.value = 0.16;
+    v.sum = sum;
+
+    const panner = ac.createStereoPanner();
+    panner.pan.value = panValue;
+    v.panner = panner;
+
+    const wave = document.getElementById('wave').value;
+    const spreads = [-1, -0.4, 0.4, 1];
+    for (let i = 0; i < 4; i++) {
+      const osc = ac.createOscillator();
+      osc.type = wave;
+      osc.frequency.value = baseFreq;
+      osc.detune.value = spreads[i] * params.detune;
+
+      // per-osc slow drift
+      const driftLfo = ac.createOscillator();
+      driftLfo.type = 'sine';
+      driftLfo.frequency.value = 0.04 + Math.random() * 0.18;
+      const driftGain = ac.createGain();
+      driftGain.gain.value = params.drift * 7;
+      driftLfo.connect(driftGain);
+      driftGain.connect(osc.detune);
+      driftLfo.start();
+
+      // global wobble feeds osc.detune
+      state.wobbleScale.connect(osc.detune);
+
+      osc.connect(sum);
+      osc.start();
+      v.oscs.push({ osc, driftGain, spread: spreads[i] });
+      v.extra.push(driftLfo);
+    }
+
+    // sub
+    const sub = ac.createOscillator();
+    sub.type = 'sine';
+    sub.frequency.value = baseFreq / 2;
+    const subGain = ac.createGain();
+    subGain.gain.value = params.sub * 0.6;
+    sub.connect(subGain);
+    subGain.connect(sum);
+    sub.start();
+    v.subOsc = sub;
+    v.subGain = subGain;
+
+    sum.connect(panner);
+    panner.connect(state.voicesBus);
+
+    v.stop = (when) => {
+      v.oscs.forEach(o => { try { o.osc.stop(when); } catch(e){} });
+      try { v.subOsc.stop(when); } catch(e){}
+      v.extra.forEach(n => { try { n.stop(when); } catch(e){} });
+    };
+    return v;
+  }
+
+  function panForIndex(i, total, width) {
+    if (total <= 1) return 0;
+    const t = i / (total - 1);
+    return (t * 2 - 1) * width;
+  }
+
+  function buildVoices() {
+    const root = parseInt(document.getElementById('root').value, 10);
+    const oct = parseInt(document.getElementById('octave').value, 10);
+    const voicing = voicings[document.getElementById('voicing').value];
+    voicing.forEach((semi, i) => {
+      const midi = 12 + oct * 12 + root + semi;
+      const freq = 440 * Math.pow(2, (midi - 69) / 12);
+      const pan = panForIndex(i, voicing.length, params.width);
+      state.voices.push(makeVoice(freq, pan));
+    });
+  }
+
+  function updateLive() {
+    if (!ac) return;
+    const t = ac.currentTime;
+    const tau = 0.08;
+
+    state.filt1.frequency.setTargetAtTime(params.brightness, t, tau);
+    state.filt2.frequency.setTargetAtTime(params.brightness * 1.3, t, tau);
+    state.filt1.Q.setTargetAtTime(0.7 + params.resonance * 14, t, tau);
+
+    state.motionLfo.frequency.setTargetAtTime(params.rate, t, tau);
+    state.motionGain.gain.setTargetAtTime(params.brightness * params.depth * 0.6, t, tau);
+
+    state.dryGain.gain.setTargetAtTime(1 - params.space * 0.4, t, tau);
+    state.reverbSend.gain.setTargetAtTime(params.space * 0.7, t, tau);
+
+    state.chorus.dryGain.gain.setTargetAtTime(1 - params.shimmer * 0.4, t, tau);
+    state.chorus.wetGain.gain.setTargetAtTime(params.shimmer * 0.6, t, tau);
+
+    state.saturator.curve = makeSatCurve(params.warmth);
+
+    state.wobbleScale.gain.setTargetAtTime(params.wobble * 22, t, tau);
+
+    if (state.noiseGain) {
+      const noiseLevel = state.playing ? params.noise * 0.18 : 0;
+      state.noiseGain.gain.setTargetAtTime(noiseLevel, t, tau);
+    }
+
+    state.voices.forEach((v, i) => {
+      v.oscs.forEach(o => {
+        o.osc.detune.setTargetAtTime(o.spread * params.detune, t, tau);
+        o.driftGain.gain.setTargetAtTime(params.drift * 7, t, tau);
+      });
+      v.subGain.gain.setTargetAtTime(params.sub * 0.6, t, tau);
+      v.panner.pan.setTargetAtTime(panForIndex(i, state.voices.length, params.width), t, tau);
+    });
+
+    if (state.playing) {
+      state.master.gain.setTargetAtTime(params.volume, t, tau);
+    }
+  }
+
+  function applyPitchLive() {
+    if (!state.playing || !ac) return;
+    const t = ac.currentTime;
+    const fadeOut = 0.5, fadeIn = 0.6;
+
+    state.voicesBus.gain.cancelScheduledValues(t);
+    state.voicesBus.gain.setValueAtTime(state.voicesBus.gain.value, t);
+    state.voicesBus.gain.linearRampToValueAtTime(0.001, t + fadeOut);
+
+    setTimeout(() => {
+      const oldVoices = state.voices;
+      state.voices = [];
+      oldVoices.forEach(v => v.stop(ac.currentTime + 0.1));
+      buildVoices();
+      const t2 = ac.currentTime;
+      state.voicesBus.gain.cancelScheduledValues(t2);
+      state.voicesBus.gain.setValueAtTime(0.001, t2);
+      state.voicesBus.gain.linearRampToValueAtTime(1, t2 + fadeIn);
+    }, fadeOut * 1000 + 50);
+  }
+
+  function play() {
+    ensureAudio();
+    if (ac.state === 'suspended') ac.resume();
+    if (state.playing) return;
+
+    state.voices.forEach(v => v.stop(ac.currentTime + 0.1));
+    state.voices = [];
+    buildVoices();
+
+    state.playing = true;
+    const t = ac.currentTime;
+    state.master.gain.cancelScheduledValues(t);
+    state.master.gain.setValueAtTime(state.master.gain.value, t);
+    state.master.gain.linearRampToValueAtTime(params.volume, t + params.attack);
+    state.noiseGain.gain.cancelScheduledValues(t);
+    state.noiseGain.gain.setValueAtTime(state.noiseGain.gain.value, t);
+    state.noiseGain.gain.linearRampToValueAtTime(params.noise * 0.18, t + params.attack);
+
+    document.getElementById('playBtn').textContent = 'stop';
+    document.getElementById('playBtn').classList.add('playing');
+    document.getElementById('status').textContent = 'sounding';
+  }
+
+  function stop() {
+    if (!state.playing) return;
+    state.playing = false;
+    const t = ac.currentTime;
+    const release = Math.max(1.5, params.attack * 0.7);
+    state.master.gain.cancelScheduledValues(t);
+    state.master.gain.setValueAtTime(state.master.gain.value, t);
+    state.master.gain.linearRampToValueAtTime(0.0001, t + release);
+    state.noiseGain.gain.cancelScheduledValues(t);
+    state.noiseGain.gain.setValueAtTime(state.noiseGain.gain.value, t);
+    state.noiseGain.gain.linearRampToValueAtTime(0.0001, t + release);
+
+    const voicesToKill = state.voices;
+    state.voices = [];
+    setTimeout(() => {
+      voicesToKill.forEach(v => v.stop(ac.currentTime + 0.05));
+    }, (release + 0.2) * 1000);
+
+    document.getElementById('playBtn').textContent = 'play';
+    document.getElementById('playBtn').classList.remove('playing');
+    document.getElementById('status').textContent = 'releasing';
+    setTimeout(() => {
+      if (!state.playing) document.getElementById('status').textContent = 'stopped';
+    }, release * 1000 + 200);
+  }
+
+  document.getElementById('playBtn').addEventListener('click', () => {
+    if (state.playing) stop(); else play();
+  });
+
+  // --- presets ---
+  const presets = {
+    cathedral: {
+      detune: 18, drift: 0.5, wobble: 0.25, sub: 0.4, noise: 0.1, width: 0.7,
+      brightness: 2200, resonance: 0.15, warmth: 0.2,
+      rate: 0.08, depth: 0.4, shimmer: 0.7,
+      space: 0.85, attack: 6, volume: 0.65,
+      ui: { wave: 'sawtooth', filter: 'lowpass', lfoshape: 'sine' },
+      pitch: { root: 2, octave: 2, voicing: 'fifthoct' }
+    },
+    deepspace: {
+      detune: 25, drift: 0.7, wobble: 0.4, sub: 0.7, noise: 0.18, width: 0.85,
+      brightness: 700, resonance: 0.25, warmth: 0.35,
+      rate: 0.05, depth: 0.6, shimmer: 0.5,
+      space: 0.9, attack: 8, volume: 0.7,
+      ui: { wave: 'sawtooth', filter: 'lowpass', lfoshape: 'sine' },
+      pitch: { root: 9, octave: 1, voicing: 'octave' }
+    },
+    warmpad: {
+      detune: 12, drift: 0.3, wobble: 0.2, sub: 0.5, noise: 0.08, width: 0.55,
+      brightness: 1600, resonance: 0.1, warmth: 0.55,
+      rate: 0.2, depth: 0.35, shimmer: 0.4,
+      space: 0.55, attack: 3, volume: 0.7,
+      ui: { wave: 'sawtooth', filter: 'lowpass', lfoshape: 'sine' },
+      pitch: { root: 0, octave: 3, voicing: 'major' }
+    },
+    evolving: {
+      detune: 22, drift: 0.85, wobble: 0.45, sub: 0.4, noise: 0.2, width: 0.75,
+      brightness: 1100, resonance: 0.3, warmth: 0.25,
+      rate: 0.11, depth: 0.7, shimmer: 0.65,
+      space: 0.7, attack: 5, volume: 0.7,
+      ui: { wave: 'sawtooth', filter: 'lowpass', lfoshape: 'triangle' },
+      pitch: { root: 4, octave: 2, voicing: 'sus2' }
+    },
+    subterranean: {
+      detune: 8, drift: 0.4, wobble: 0.15, sub: 1.0, noise: 0.05, width: 0.4,
+      brightness: 380, resonance: 0.45, warmth: 0.6,
+      rate: 0.04, depth: 0.5, shimmer: 0.25,
+      space: 0.75, attack: 7, volume: 0.75,
+      ui: { wave: 'sawtooth', filter: 'lowpass', lfoshape: 'sine' },
+      pitch: { root: 0, octave: 1, voicing: 'fifth' }
+    },
+    bell: {
+      detune: 6, drift: 0.25, wobble: 0.18, sub: 0.2, noise: 0.05, width: 0.8,
+      brightness: 3200, resonance: 0.4, warmth: 0.15,
+      rate: 0.07, depth: 0.3, shimmer: 0.85,
+      space: 0.9, attack: 4, volume: 0.6,
+      ui: { wave: 'triangle', filter: 'bandpass', lfoshape: 'sine' },
+      pitch: { root: 4, octave: 3, voicing: 'bell' }
+    },
+    windworn: {
+      detune: 30, drift: 0.95, wobble: 0.6, sub: 0.3, noise: 0.45, width: 0.95,
+      brightness: 900, resonance: 0.2, warmth: 0.4,
+      rate: 0.06, depth: 0.55, shimmer: 0.6,
+      space: 0.8, attack: 6, volume: 0.6,
+      ui: { wave: 'sawtooth', filter: 'highpass', lfoshape: 'triangle' },
+      pitch: { root: 2, octave: 2, voicing: 'cluster' }
+    },
+    vault: {
+      detune: 5, drift: 0.2, wobble: 0.1, sub: 0.85, noise: 0.0, width: 0.3,
+      brightness: 240, resonance: 0.6, warmth: 0.7,
+      rate: 0.03, depth: 0.45, shimmer: 0.2,
+      space: 0.6, attack: 8, volume: 0.7,
+      ui: { wave: 'square', filter: 'lowpass', lfoshape: 'sine' },
+      pitch: { root: 0, octave: 1, voicing: 'octave' }
+    },
+  };
+  document.querySelectorAll('[data-preset]').forEach(b => {
+    b.addEventListener('click', () => {
+      const p = presets[b.dataset.preset];
+      Object.keys(ranges).forEach(k => { if (k in p) params[k] = p[k]; });
+      Object.keys(ranges).forEach(refreshSlider);
+      if (p.ui) {
+        document.getElementById('wave').value = p.ui.wave;
+        document.getElementById('filter').value = p.ui.filter;
+        document.getElementById('lfoshape').value = p.ui.lfoshape;
+        if (ac) {
+          state.voices.forEach(v => v.oscs.forEach(o => o.osc.type = p.ui.wave));
+          state.filt1.type = p.ui.filter;
+          state.filt2.type = p.ui.filter;
+          state.motionLfo.type = p.ui.lfoshape;
+        }
+      }
+      if (p.pitch) {
+        document.getElementById('root').value = p.pitch.root;
+        document.getElementById('octave').value = p.pitch.octave;
+        document.getElementById('voicing').value = p.pitch.voicing;
+      }
+      updateLive();
+      if (state.playing) applyPitchLive();
+    });
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') {
+      e.preventDefault();
+      if (state.playing) stop(); else play();
+    }
+  });
+})();
+</script>
+</body>
+</html>
