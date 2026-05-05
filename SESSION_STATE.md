@@ -1,5 +1,5 @@
 ---
-workflow_step: deployed_awaiting_dns
+workflow_step: live_polish_pass_landed
 agent_type: execute
 token_budget: deep
 last_updated: 2026-05-04
@@ -8,66 +8,72 @@ last_updated: 2026-05-04
 # la route — sound machine instrument
 
 ## What this is
-A browser-native sound machine / live performance instrument. Single HTML file at `~/Developer/acid-303/studio_v2_20260503.html`, no build step, no backend. Five module surfaces (bassline + drone + drums + texture + didgeridoo via drone presets), 36 scenes, manual crossfade timeline, in-browser MP3 recording. Renamed to **la route** as homage to Kangding Ray's track of the same name (from *Sirât*, 2025).
+A browser-native sound machine / live performance instrument. Single HTML file at `~/Developer/acid-303/studio_v2_20260503.html`, no build step, no backend. Five module surfaces (drone + drums + texture + didgeridoo + bassline) at the new rack order, 33 scenes, manual crossfade timeline, in-browser MP3 recording. Renamed to **la route** as homage to Kangding Ray's track of the same name (from *Sirât*, 2025).
 
 ## Status
-**v2 deployed to production.** Working file is `studio_v2_20260503.html`. v1 lock + v1 working both preserved. Live at https://la-route-livid.vercel.app/ (Vercel default URL). Custom domain `laroute.ciamac.com` is **attached on Vercel but not yet resolving** — pending DNS CNAME setup at Cloudflare.
+**v2 deployed, custom domain live, post-launch polish pass landed.**
+- Live at https://laroute.ciamac.com/ (Cloudflare proxy ON / orange cloud, working).
+- Default URL still works: https://la-route-livid.vercel.app/
+- All four session commits pushed to `cia-mac/la-route` main, deployed via Vercel.
 
-## Today's session deltas (post-v2 lock, all in studio_v2)
-1. **Quick-access left nav.** 7 anchors (scene / timeline / mixer / 4 modules) with keyboard shortcuts 0–4. IntersectionObserver tracks active section. Visible at viewports ≥720px.
-2. **Bassline channel** cut twice: 78% → 52% → 38%. Subline (la route default acid preset) rewritten as a smooth deep hum: square wave + clean drive + cutoff 130 + reso 0.15 + envmod 0.08 + decay 0.95 + slides on every step. The old "fart" character is gone.
-3. **Acid preset apply** extended to honor `wave` and `drive` fields per preset (so subline switches to square + clean automatically).
-4. **Drone evolve toggle** sits next to drone play. When on, walks 8 params (drift / wobble / rate / brightness / resonance / depth / shimmer / detune) over 12s windows. Sliders move with the audio. State persists.
-5. **Drone level** cut from 52% to 38% so the bed sits underneath the drums.
-6. **Manual crossfade timeline** replaces the timed transition. Each cue loops indefinitely. A horizontal fader morphs current → next: tempo lerps continuously (BPM stays locked across the fade), master ducks parabolically, presets swap at midpoint with undo if user drags back, finalizes at >0.985. Loop on by default. `cut →` button hard-cuts without crossfade. Active cue + next cue names render in Bodoni italic on either side of the fader.
-7. **+ ~30 new presets** across all categories. Scenes 25 → 30 (added monolith / reliquary / glasshouse / eclipse / breakwater). Acid 12 → 17 (fathom / pendulum / undertow / mantra / pillar — all wormy, slides on every step, audible filter sweep). Drum patterns 31 → 36 (monolith / pulse / shuffle / hollow / ember). Drone 21 → 29 (monastery / tundra / thurible / lokus / phosphor + 3 didgeridoo presets: didge / didge·vocal / didge·growl, low D fundamental + breath pulse via LFO rate × depth). Grain 17 → 22 (crackle / breath / sand / kiln / frost). Drum kits 15 → 25 (glass-roll / sahara / brass / bunker / silk + roomy / taut / foamy / chant / machine).
-8. **Deploy assets.** Vercel rewrite from `/` → `/studio_v2_20260503.html`. OG meta + Twitter card + theme color in studio_v2. og.svg (1200×630, Bodoni mark on charred earth + grain). favicon.svg (italic 'r' in burnt sienna on charred earth). 404.html ("lost the route") in same brand. README.md with module/preset summary and credits.
-9. **Git + repo.** `~/Developer/acid-303` is now a git repo, public on GitHub at https://github.com/cia-mac/la-route. Three stale standalone HTMLs (index.html, drone.html, ritual.html — the pre-studio module pages) moved to `archive/`.
+## Today's session deltas (post-DNS-landing)
 
-## Architecture (high level)
-- Single ~5900-line HTML, four module IIFEs + Studio singleton + scene system + mixer + extractor + recording + timeline IIFE + quick-nav IIFE.
-- Studio singleton owns: shared AudioContext, masterBus → masterVolume → masterLimiter → destination, recording PCM tap, tempo source-of-truth, module registry. Exposes `window._laRouteSetMasterGain` for timeline ducking and `window.LaRoute = { scenes, applyScene, iconSvg }` for timeline access.
-- Timeline IIFE owns: cues array, render → DOM, drag-drop from `.scene-btn` to `.timeline-strip`, manual crossfade fader → tempo lerp + master duck + preset swap at midpoint, finalize at >0.985.
-- Quick-nav IIFE owns: anchor click handlers (scrollIntoView smooth) + keyboard 0–4 shortcuts + IntersectionObserver active highlight.
-- Drone IIFE owns: evolve engine — pickTargets every 12s, smoothstep lerp, refresh sliders, updateLive.
+### UX
+1. **Module rack reorder.** New order: drone → drums → texture → didge → bassline. Cia's reasoning: "turn them on one by one" with pad foundation first, rhythm second, color layers, bass last. Updated everywhere: rack-num labels (/01–/05), quick-nav anchors, keyboard shortcuts (1–5), mixer order, mixer num labels. Onboarding-card anchor updated from acid → drone.
+2. **Bigger pass.** Every font tier bumped (10→12, 11→13, 12→14, 13→15, 14→16, 15→17, 16→19, 17→20, 18→22, 19→23, 22→27, 24→30, 36→44, 52→64). Container max-width 1480 → 1640. Side padding 24/32 → 32/40.
+3. **First-use overlay removed.** The four-card semitransparent guides got in the way more than they helped. Pulse on play-all stays under a fresh localStorage key `sm-pulse-dismissed-v1`. Dismisses on first scene/play/rec click.
 
-## Decisions made this session
-1. Path B (full v2 in one cut) over Path A (feature-first).
-2. Vertical rack replaces tabs.
-3. Per-module color stripes via CSS custom properties.
-4. Drives halved globally rather than tuning each preset individually.
-5. Clang track default volume zeroed (opt-in only) rather than removed.
-6. Timeline transitions use duck-swap, then refactored to manual crossfade in the same session.
-7. Loop on by default.
-8. Bassline default switched from saw to square + clean drive via per-preset wave/drive override.
-9. Didgeridoo implemented as drone presets, not a separate rack module (low risk, fast ship; full module possible if Cia wants it).
-10. Subdomain `laroute.ciamac.com` over subroute on the main site (brand mismatch — la route is Bodoni / charred earth, ciamac.com v2.3 is Helvetica / Caspian Deep).
-11. Public GitHub repo at cia-mac/la-route.
-12. Stale standalone HTMLs moved to `archive/` rather than deleted (per the "never delete, archive" rule).
+### Mix balance (v2 loudness neutralization v3)
+4. **Drone level cut twice this session: 0.38 → 0.24 → 0.14.** Cia complained drone was too loud relative to drums. Drone vs drums separation is now ≈ −16 dB, drone sits firmly underneath.
+5. **Didge cut from 0.40 → 0.26.** Sustained source, treated like drone.
+6. **Texture nudged from 0.58 → 0.50 → 0.46** to keep the pocket as drone got quieter.
+7. **Drums hold at 0.92, bassline at 0.38.** Unchanged.
+
+### Audio bug fixes (the audit)
+8. **Drone voice stacking on rapid stop→play (CRITICAL).** `stop()` schedules voice cleanup via setTimeout (1.5–5.8s). If user clicked play during that window, prior voices kept feeding the master that was ramping back up. Doubled / stuck-sounding pad. Added `killPendingStopVoices()` called from play() and stop().
+9. **Drone zombie voices on scene change during stop.** `applyPitchLive`'s setTimeout always built new voices, even if user pressed stop during the 550ms duck. New voices stacked silently in a stopped master, then woke up on next play. Timer now checks `state.playing`; aborts cleanly instead of building.
+10. **Drone hang from stuck voicesBus (CRITICAL).** `voicesBus.gain` ramps to 0.001 during `applyPitchLive`'s fade-out. If user pressed stop during that fade, the fade-back-up branch never ran. voicesBus stuck at 0.001 = 60 dB attenuator. Next play came up silent / "hung." Now `play()` resets voicesBus.gain to 1, and the aborted-pitch branch does the same.
+11. **Grain (texture) play-after-stop deadlock.** `state.playing` was set to false inside the deferred timeout, so `play()`'s early-return guard misfired during the release window. Clicking play right after stop did nothing for ~1s. Now `state.playing = false` flips immediately; deferred timer just clears the interval and short-circuits if user resumed.
+12. **Fold state for didge not persisted.** Restore list at line 2498 was `['acid','drone','ritual','grain']` — missing 'didge'. Added.
+
+### What's still as-designed
+- **Drone evolve runs CPU work even when drone is stopped.** Audibly nothing — params evolve silently, drone resumes with fresh values. Intentional, left as-is.
+- **Drone stop fade is up to 5.6s** (release = max(1.5, attack × 0.7)). Slow by design for pads. If Cia ever asks for snappier stops, scale that down.
+- **Cloudflare proxy is ON, not OFF.** Vercel-assumed SSL is replaced by Cloudflare's. Empirically working. If audio ever misbehaves (Rocket Loader / auto-minify), flip the cloud gray.
+
+## Git this session (cia-mac/la-route, all pushed)
+- `0ed2c87` fix: drone/grain stop bugs + reorder rack + bigger type
+- `848c1c6` remove first-use overlay; keep play-all pulse only
+- `b176df1` fix: drone hang from stuck voicesBus + cut drone/didge levels
+- `1c55d69` fix: restore fold state for didge
 
 ## Open loops
-- **DNS CNAME at Cloudflare.** Cia needs to add `laroute` CNAME → `cname.vercel-dns.com` (proxy OFF / gray cloud / DNS only) in the ciamac.com Cloudflare zone. Once propagated (under 60s typically), https://laroute.ciamac.com/ resolves and Vercel issues SSL automatically (~30s on first request).
-- **Smoke test custom domain** after DNS lands. Audio plays after first click, scenes load, recording works, OG card previews properly on iMessage / Twitter / WhatsApp.
-- **Optional: gallery tile.** Add a `web` tile to the gallery (via stage clone) linking to laroute.ciamac.com so visitors find la route from ciamac.com → WORK button.
-- **Optional: full didgeridoo module.** Currently presets within the drone module. A separate rack section with its own engine (more rhythmic mouth pulses, throat formant control, animal call modes) is feasible but requires HTML + JS + mixer wiring + scene routing.
-- **Optional: URL hash deep linking.** Encode active scene + cues + tempo + master vol into the URL hash so sharing a link recreates a specific vibe.
-- Beat extractor still has fuzzy mid/hat detection (kick band reliable). Untouched.
-- No mobile / touch support. Drag-drop and keyboard shortcuts both desktop-only.
-- Cue blocks fixed at 156px width. No per-cue scene swap (delete + re-add).
+- **Optional: gallery tile.** Add a `web` tile to ciamac-gallery-stage linking to laroute.ciamac.com via the stage clone, then promote to live per the gallery release protocol.
+- **Optional: full didgeridoo module.** Currently presets within the drone module *plus* a separate didge module. The full-blown rack section is here — but if Cia wants more rhythmic mouth pulses / throat formant control / animal call modes, that's a feature pass.
+- **Optional: URL hash deep linking.** Encode active scene + cues + tempo + master vol into the URL hash so sharing a link recreates a specific vibe. ~30–60 min of work.
+- **Optional: OG image PNG.** Current `og.svg` doesn't render on Twitter / FB / LinkedIn link previews. Export a 1200×630 PNG, swap meta. Biggest single win for "share this link" stories.
+- **Optional: self-host lamejs.** Currently loaded from cdn.jsdelivr.net. If blocked or down, MP3 recording fails (rest of app fine). 50 KB self-host fixes it.
+- **Optional: em-dash sweep.** `<title>` and `og:title` use "la route — ciamac" (em dash). Violates CLAUDE.md "no em dashes" rule. One-line fix.
+- **Strategic: styleguide v4.4 alignment.** v4.4 retired Cadmium Yellow for Persian Rust #A2462F, partially obsoleting the brand-mismatch rationale (decision #10) for la route's subdomain. Two paths drafted in conversation:
+  - **A — full conformance:** treat la route as a /lab page, swap Bodoni → Fraunces, add CIAMAC wordmark top-left. Risk: instrument feels stiff.
+  - **B — instrument carveout:** adopt v4.4 tokens + sanctioned faces + persistent wordmark, but preserve the dense scene grid + timeline + mixer because the instrument IS the page.
+  - Cia parked this question. My recommendation was **don't redesign now** — current Bodoni + charred earth + rust is coherent on its own; spend energy on ship-readiness instead.
 
 ## Working rules (carry forward)
-- File versioning is non-negotiable: every working snapshot saved as v1, v2, v3. Three locks preserved: studio.html (pre-v1 working), studio_v1_20260501.html, studio_v2_20260503.html.
-- Bodoni Moda (display) + Inter (body) typography unchanged. Don't switch without asking.
+- File versioning is non-negotiable. Three locks preserved: studio.html (pre-v1 working), studio_v1_20260501.html, studio_v2_20260503.html. Plus SESSION_STATE_v1, v2, v3 (locked this turn before rewrite).
+- Bodoni Moda (display) + Inter (body) typography unchanged.
 - Recording filename `la-route-{ts}.mp3` unchanged.
 - Saturation curve `k = amount * 5 + 0.5`. Master limiter 5:1 / -3dB / wider knee.
 - Drive defaults capped at 0.32 for ritual + acid presets. Distortion is opt-in.
 - Clang muted by default (volume 0). Re-enable per track manually.
-- Scene system + crossfade timeline are the front door. Preserve and extend.
 - Subline must stay smooth (square wave, clean drive, cutoff 130, reso 0.15, envmod 0.08). The fart can't come back.
+- **Mix levels (v3 baseline):** drone 0.14, drums 0.92, texture 0.46, didge 0.26, bassline 0.38. Sustained sources sit far below transient sources.
+- **Module rack order:** drone → drums → texture → didge → bassline. /01–/05.
+- Scene system + crossfade timeline are the front door — preserve and extend.
 
 ## Reference materials
 - `~/Developer/dispatches/kr_track_Sirāt.wav` — Kangding Ray Sirât (full track, used by extractor pipeline)
 - https://github.com/cia-mac/la-route — public repo, main branch
 - ciamacparhizi-9083s-projects/la-route on Vercel
-- Live (default): https://la-route-livid.vercel.app/
-- Custom domain target: https://laroute.ciamac.com/ (pending DNS)
+- Custom domain: https://laroute.ciamac.com/ (Cloudflare proxy ON, working)
+- Default Vercel: https://la-route-livid.vercel.app/
