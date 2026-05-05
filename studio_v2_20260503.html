@@ -2495,7 +2495,7 @@ const Studio = (() => {
     });
   });
   // restore fold state
-  ['acid','drone','ritual','grain'].forEach(mod => {
+  ['acid','drone','ritual','grain','didge'].forEach(mod => {
     try {
       if (localStorage.getItem(`sm-fold-${mod}`) === '1') {
         const section = document.getElementById(`modSection-${mod}`);
