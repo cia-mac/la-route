@@ -3276,11 +3276,14 @@ const Studio = (() => {
     if (state.pendingPitchTimer) clearTimeout(state.pendingPitchTimer);
     state.pendingPitchTimer = setTimeout(() => {
       state.pendingPitchTimer = 0;
-      // user stopped during the fade — don't strand new voices in a silent master
+      // user stopped during the fade — don't strand new voices in a silent master,
+      // and reset voicesBus so the next play doesn't come up through a 60dB duck
       if (!state.playing) {
         const oldVoices = state.voices;
         state.voices = [];
         oldVoices.forEach(v => v.stop(ac.currentTime + 0.05));
+        state.voicesBus.gain.cancelScheduledValues(ac.currentTime);
+        state.voicesBus.gain.setValueAtTime(1, ac.currentTime);
         return;
       }
       const oldVoices = state.voices;
@@ -3316,6 +3319,9 @@ const Studio = (() => {
     buildVoices();
     state.playing = true;
     const t = ac.currentTime;
+    // restore voicesBus in case a prior aborted applyPitchLive left it ducked
+    state.voicesBus.gain.cancelScheduledValues(t);
+    state.voicesBus.gain.setValueAtTime(1, t);
     state.master.gain.cancelScheduledValues(t);
     state.master.gain.setValueAtTime(state.master.gain.value, t);
     state.master.gain.linearRampToValueAtTime(params.volume, t + params.attack);
@@ -5020,10 +5026,10 @@ const Studio = (() => {
   // louder than transient sources (drums, bassline) at equal RMS. Per-channel
   // defaults compensate so all four read at similar perceived level.
   const moduleOrder = [
-    { id: 'drone',  num: '/01', name: 'drone',      defaultLevel: 0.24 },
+    { id: 'drone',  num: '/01', name: 'drone',      defaultLevel: 0.14 },
     { id: 'ritual', num: '/02', name: 'drums',      defaultLevel: 0.92 },
-    { id: 'grain',  num: '/03', name: 'texture',    defaultLevel: 0.50 },
-    { id: 'didge',  num: '/04', name: 'didgeridoo', defaultLevel: 0.40 },
+    { id: 'grain',  num: '/03', name: 'texture',    defaultLevel: 0.46 },
+    { id: 'didge',  num: '/04', name: 'didgeridoo', defaultLevel: 0.26 },
     { id: 'acid',   num: '/05', name: 'bassline',   defaultLevel: 0.38 },
   ];
   const channelStrips = {};
