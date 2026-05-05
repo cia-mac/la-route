@@ -1331,83 +1331,6 @@
     border-color: var(--accent) !important;
   }
 
-  .ob-overlay {
-    position: fixed; inset: 0;
-    background: rgba(8, 6, 4, 0.32);
-    backdrop-filter: blur(1.5px);
-    -webkit-backdrop-filter: blur(1.5px);
-    z-index: 1000;
-    display: none;
-    pointer-events: auto;
-  }
-  .ob-overlay.visible { display: block; }
-  .ob-overlay::before {
-    /* dust grain to match brand */
-    content: '';
-    position: absolute; inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.84  0 0 0 0 0.55  0 0 0 0 0.32  0 0 0 0.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    opacity: 0.18;
-    mix-blend-mode: overlay;
-    pointer-events: none;
-  }
-
-  .ob-card {
-    position: absolute;
-    background: rgba(21, 17, 12, 0.78);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid var(--accent);
-    border-left-width: 3px;
-    border-radius: 4px;
-    padding: 14px 18px 14px 16px;
-    max-width: 280px;
-    font-family: 'Inter', sans-serif;
-    font-size: 15px;
-    line-height: 1.55;
-    color: var(--ink);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    pointer-events: auto;
-  }
-  .ob-card .ob-title {
-    display: block;
-    font-family: 'Bodoni Moda', serif;
-    font-style: italic;
-    font-size: 22px;
-    color: var(--accent);
-    margin-bottom: 4px;
-    letter-spacing: 0.01em;
-  }
-  .ob-card .ob-num {
-    display: inline-block;
-    font-family: 'Inter', sans-serif;
-    font-style: normal;
-    font-size: 13px;
-    color: var(--muted);
-    letter-spacing: 0.16em;
-    margin-right: 10px;
-    vertical-align: 2px;
-  }
-
-  .ob-dismiss {
-    position: fixed;
-    bottom: 36px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--accent);
-    color: #f5e6d3;
-    border: none;
-    padding: 12px 28px;
-    font-family: 'Bodoni Moda', serif;
-    font-style: italic;
-    font-size: 22px;
-    cursor: pointer;
-    border-radius: 4px;
-    letter-spacing: 0.04em;
-    box-shadow: 0 6px 22px rgba(214, 84, 29, 0.35);
-    transition: background 120ms, transform 120ms;
-  }
-  .ob-dismiss:hover { background: #e0651f; transform: translateX(-50%) translateY(-1px); }
-  .ob-dismiss:active { transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
@@ -6037,110 +5960,33 @@ const Studio = (() => {
   updateFaderLabels();
 })();
 
-// ── first-use onboarding ───────────────────────────────────────────
-(function onboarding() {
-  const KEY = 'sm-onboarded-v1';
+// ── first-use pulse on play-all ────────────────────────────────────
+(function firstUsePulse() {
+  const KEY = 'sm-pulse-dismissed-v1';
   let dismissed = false;
   try { dismissed = localStorage.getItem(KEY) === '1'; } catch (e) {}
   if (dismissed) return;
 
   const playBtn = document.getElementById('playAllBtn');
-  if (playBtn) playBtn.classList.add('first-use-pulse');
-
-  const overlay = document.createElement('div');
-  overlay.className = 'ob-overlay';
-  overlay.id = 'obOverlay';
-
-  const cards = [
-    { anchor: 'sceneGrid',       num: '/01', title: 'pick a scene',           body: 'each scene loads a complete vibe across all four modules at once.', place: 'below' },
-    { anchor: 'modSection-drone', num: '/02', title: 'or one at a time',      body: 'every module has its own play. start with the drone on top, then layer at your own pace.', place: 'right' },
-    { anchor: 'timelineStrip',   num: '/03', title: 'build a sequence',       body: 'drag scenes onto the strip. drag the fader to morph between them.', place: 'above' },
-    { anchor: 'recBtn',          num: '/04', title: 'record what you make',   body: 'press rec or hit R. saves as mp3 when you stop.', place: 'left' }
-  ];
-
-  cards.forEach(c => {
-    const el = document.createElement('div');
-    el.className = 'ob-card';
-    el.dataset.anchor = c.anchor;
-    el.dataset.place = c.place;
-    el.innerHTML = `<span class="ob-title"><span class="ob-num">${c.num}</span>${c.title}</span>${c.body}`;
-    overlay.appendChild(el);
-  });
-
-  const dismissBtn = document.createElement('button');
-  dismissBtn.className = 'ob-dismiss';
-  dismissBtn.textContent = 'begin';
-  overlay.appendChild(dismissBtn);
-
-  document.body.appendChild(overlay);
-
-  function position() {
-    cards.forEach(c => {
-      const target = document.getElementById(c.anchor);
-      const card = overlay.querySelector(`.ob-card[data-anchor="${c.anchor}"]`);
-      if (!target || !card) return;
-      const r = target.getBoundingClientRect();
-      const cw = card.offsetWidth;
-      const ch = card.offsetHeight;
-      const pad = 16;
-      let top, left;
-      switch (c.place) {
-        case 'below':
-          top  = r.bottom + pad;
-          left = r.left + r.width / 2 - cw / 2;
-          break;
-        case 'above':
-          top  = r.top - ch - pad;
-          left = r.left + r.width / 2 - cw / 2;
-          break;
-        case 'right':
-          top  = r.top + Math.min(40, r.height / 2 - ch / 2);
-          left = r.right + pad;
-          break;
-        case 'left':
-          top  = r.top + r.height / 2 - ch / 2;
-          left = r.left - cw - pad;
-          break;
-      }
-      // viewport clamp
-      top  = Math.max(12, Math.min(top, window.innerHeight - ch - 12));
-      left = Math.max(12, Math.min(left, window.innerWidth - cw - 12));
-      card.style.top  = top + 'px';
-      card.style.left = left + 'px';
-    });
-  }
-
-  function show() {
-    overlay.classList.add('visible');
-    requestAnimationFrame(position);
-  }
+  if (!playBtn) return;
+  playBtn.classList.add('first-use-pulse');
 
   function dismiss() {
     if (dismissed) return;
     dismissed = true;
     try { localStorage.setItem(KEY, '1'); } catch (e) {}
-    overlay.classList.remove('visible');
-    overlay.remove();
-    if (playBtn) playBtn.classList.remove('first-use-pulse');
-    window.removeEventListener('resize', position);
+    playBtn.classList.remove('first-use-pulse');
   }
 
-  dismissBtn.addEventListener('click', dismiss);
-  // dismiss on any first real interaction
   document.addEventListener('click', (e) => {
     if (dismissed) return;
-    if (e.target.closest('.ob-overlay') && !e.target.closest('.ob-dismiss')) return;
     if (e.target.closest('.scene-btn') ||
         e.target.closest('#playAllBtn') ||
-        e.target.closest('.play-btn') ||
+        e.target.closest('.rack-play') ||
         e.target.closest('#recBtn')) {
       dismiss();
     }
   }, true);
-
-  window.addEventListener('resize', position);
-  // wait one frame so font metrics settle
-  requestAnimationFrame(() => requestAnimationFrame(show));
 })();
 </script>
 </body>
