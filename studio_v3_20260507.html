@@ -45,8 +45,8 @@
     --muted: #786c5e;
     --muted-2: #5a4f43;
 
-    /* accents — Sirât: faded mustard / muted rust / dusty slate */
-    --accent: #c04820;
+    /* accents — Sirât: faded mustard / scarf rust / dusty slate */
+    --accent: #c03a18;
     --accent-2: #b89828;
     --accent-3: #c4a840;
     --hot: #c03820;
@@ -196,6 +196,34 @@
     text-transform: lowercase;
   }
   .brand-meta strong { color: var(--ink); font-weight: 400; }
+
+  /* Sirât brand strip — film still with horizontal motion blur */
+  .sirat-strip {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+    margin-bottom: 28px;
+    pointer-events: none;
+  }
+  .sirat-strip-img {
+    position: absolute;
+    inset: -4px -10px;
+    background: url('/sirat-still.jpg') center 42% / cover no-repeat;
+    filter: url(#siratBlur);
+    opacity: 0.32;
+    transform: scaleX(1.02);
+  }
+  .sirat-strip-fade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom,
+      var(--bg) 0%,
+      transparent 28%,
+      transparent 72%,
+      var(--bg) 100%
+    );
+  }
 
   /* controls bar */
   .studio-bar {
@@ -1344,6 +1372,15 @@
   <a href="#modSection-didge"  class="qn-item qn-didge"    data-target="modSection-didge"  data-tip="Jump to didgeridoo. Press 4."><span class="qn-num">/04</span><span class="qn-label">didge</span></a>
   <a href="#modSection-acid"   class="qn-item qn-bassline" data-target="modSection-acid"   data-tip="Jump to bassline. Press 5."><span class="qn-num">/05</span><span class="qn-label">bassline</span></a>
 </aside>
+<!-- SVG filter: pure horizontal motion blur for brand strip -->
+<svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+  <defs>
+    <filter id="siratBlur" x="-5%" width="110%" y="-5%" height="110%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="50 0.8"/>
+    </filter>
+  </defs>
+</svg>
+
 <div class="app">
 
   <header class="brand-header">
@@ -1355,6 +1392,11 @@
       a homage to Kangding Ray, la route, Sirât (2025)
     </div>
   </header>
+
+  <div class="sirat-strip" aria-hidden="true">
+    <div class="sirat-strip-img"></div>
+    <div class="sirat-strip-fade"></div>
+  </div>
 
   <div class="scene-panel">
     <div class="scene-panel-head">
