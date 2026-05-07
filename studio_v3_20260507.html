@@ -2940,7 +2940,7 @@ const Studio = (() => {
     sub: 0.5, noise: 0.15, width: 0.6,
     brightness: 1200, resonance: 0.2, warmth: 0.3,
     rate: 0.15, depth: 0.5, shimmer: 0.4,
-    space: 0.6, attack: 4.0, volume: 0.7,
+    space: 0.6, attack: 4.0, volume: 0.4,
   };
   const ranges = {
     detune:     { min: 0,    max: 50,   fmt: v => `${Math.round(v)} ct` },
@@ -3178,7 +3178,7 @@ const Studio = (() => {
 
   function makeVoice(baseFreq, panValue) {
     const v = { oscs: [], extra: [], baseFreq };
-    const sum = ac.createGain(); sum.gain.value = 0.16;
+    const sum = ac.createGain(); sum.gain.value = 0.08;
     v.sum = sum;
     const panner = ac.createStereoPanner();
     panner.pan.value = panValue;
