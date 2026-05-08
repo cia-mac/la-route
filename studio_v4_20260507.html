@@ -6,7 +6,7 @@
 <title>la route, ciamac</title>
 <meta name="description" content="A browser-native sound machine. Five modules, scenes, live crossfade timeline. A homage to Kangding Ray, la route from Sirât (2025).">
 <meta name="author" content="Ciamac Parhizi">
-<meta name="theme-color" content="#f0e8d2">
+<meta name="theme-color" content="#bfb490">
 
 <meta property="og:type" content="website">
 <meta property="og:title" content="la route, ciamac">
@@ -32,12 +32,12 @@
 <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
 <style>
   :root {
-    /* surface — bleached desert, Sirât ground / sky */
-    --bg: #f0e8d2;
-    --panel: #e8dfc6;
-    --panel-2: #ddd6bc;
-    --line: #c4bca8;
-    --line-2: #b0a898;
+    /* surface — mid-dune sand ground, warm-white elevated cards */
+    --bg: #bfb490;
+    --panel: #ede8d8;
+    --panel-2: #e4dece;
+    --line: #c8c0aa;
+    --line-2: #b8b098;
 
     /* ink — charcoal on cream */
     --ink: #1a1510;
@@ -71,7 +71,7 @@
     background: var(--bg);
     color: var(--ink);
     font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
-    font-size: 15px;
+    font-size: 16px;
     -webkit-font-smoothing: antialiased;
     user-select: none;
   }
@@ -108,7 +108,7 @@
     bottom: calc(100% + 6px);
     left: 50%;
     transform: translateX(-50%) translateY(4px);
-    background: rgba(232, 224, 200, 0.97);
+    background: rgba(237, 232, 216, 0.97);
     border: 1px solid var(--line);
     color: var(--ink-2);
     padding: 7px 10px;
@@ -227,7 +227,7 @@
 
   /* controls bar */
   .studio-bar {
-    background: rgba(240, 232, 210, 0.92);
+    background: rgba(191, 180, 144, 0.93);
     border: 1px solid var(--line);
     border-radius: 6px;
     padding: 14px 18px;
@@ -293,7 +293,7 @@
     font-weight: 500;
   }
   .play-all-btn.playing {
-    background: var(--accent); color: #f0e8d2;
+    background: var(--accent); color: #bfb490;
   }
 
   .module-status {
@@ -341,19 +341,19 @@
     display: inline-block;
   }
   .rec-btn.recording {
-    background: var(--hot); color: #f0e8d2; font-weight: 600;
+    background: var(--hot); color: #bfb490; font-weight: 600;
     animation: pulse 1.4s ease-in-out infinite;
   }
   .rec-btn.recording::before {
-    background: #f0e8d2;
+    background: #bfb490;
     border-radius: 1px;
   }
   .rec-btn.encoding {
-    background: var(--accent); color: #f0e8d2; border-color: var(--accent);
+    background: var(--accent); color: #bfb490; border-color: var(--accent);
     animation: none; cursor: progress;
   }
   .rec-btn.encoding::before {
-    background: #f0e8d2;
+    background: #bfb490;
     animation: spin 0.8s linear infinite;
   }
   @keyframes spin {
@@ -458,7 +458,7 @@
   .tab-toggle.on::before {
     width: 7px; height: 7px;
     border: none;
-    background: #f0e8d2;
+    background: #bfb490;
     border-radius: 1px;
     margin-left: 0;
   }
@@ -646,14 +646,14 @@
   }
   button.btn:hover { border-color: var(--muted-2); color: var(--ink); }
   button.btn.primary {
-    background: var(--accent); color: #f0e8d2;
+    background: var(--accent); color: #bfb490;
     border-color: var(--accent); font-weight: 600;
   }
   button.btn.primary.playing {
     background: var(--ok); border-color: var(--ok);
   }
-  button.btn.toggle.on { background: var(--accent); color: #f0e8d2; border-color: var(--accent); }
-  button.btn.on { background: var(--accent); color: #f0e8d2; border-color: var(--accent); font-weight: 500; }
+  button.btn.toggle.on { background: var(--accent); color: #bfb490; border-color: var(--accent); }
+  button.btn.on { background: var(--accent); color: #bfb490; border-color: var(--accent); font-weight: 500; }
   .preset-row { display: flex; gap: 6px; flex-wrap: wrap; }
 
   /* scene panel — cross-module presets, the front door */
@@ -681,42 +681,43 @@
   }
   .scene-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 7px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
   }
   .scene-btn {
     background: var(--panel-2);
     border: 1px solid var(--line);
-    border-radius: 3px;
-    padding: 14px 16px 12px;
+    border-radius: 4px;
+    padding: 20px 20px 16px;
     cursor: pointer;
     text-align: left;
     font-family: inherit;
-    transition: border-color 80ms, background 80ms;
+    transition: border-color 80ms, background 80ms, box-shadow 80ms;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
     color: var(--ink);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.10);
   }
   .scene-btn:hover {
-    border-color: var(--muted-2);
-    background: rgba(255,255,255,0.02);
+    border-color: var(--muted);
+    background: rgba(255,255,255,0.06);
   }
   .scene-btn.active {
     border-color: var(--accent);
-    background: rgba(72, 96, 112, 0.10);
+    background: rgba(72, 96, 112, 0.15);
   }
   .scene-name {
     font-family: 'Bodoni Moda', serif;
     font-style: italic;
-    font-size: 22px;
+    font-size: 30px;
     color: var(--ink);
     line-height: 1;
     font-weight: 400;
-    display: flex; align-items: baseline; gap: 8px;
+    display: flex; align-items: baseline; gap: 9px;
   }
   .scene-name .scene-num {
-    color: var(--muted-2);
+    color: var(--muted);
     font-size: 13px;
     font-family: 'Inter', sans-serif;
     font-style: normal;
@@ -725,9 +726,9 @@
   .scene-btn.active .scene-name { color: var(--ink); }
   .scene-btn.active .scene-name .scene-num { color: var(--accent); }
   .scene-desc {
-    font-size: 12px;
-    color: var(--muted);
-    line-height: 1.5;
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.55;
     letter-spacing: 0.01em;
     font-family: 'Inter', sans-serif;
   }
@@ -801,7 +802,7 @@
   }
   .mix-mute:hover, .mix-solo:hover { border-color: var(--muted); color: var(--ink); }
   .mix-mute.on { background: #1a0a0a; border-color: #a02020; color: #ff6060; }
-  .mix-solo.on { background: var(--accent); color: #f0e8d2; border-color: var(--accent); }
+  .mix-solo.on { background: var(--accent); color: #bfb490; border-color: var(--accent); }
   .mix-row.master {
     border-top: 1px solid var(--line);
     padding-top: 10px; margin-top: 6px;
@@ -849,7 +850,7 @@
     transition: background 80ms;
   }
   .extract-btn:hover { background: rgba(72, 96, 112, 0.10); }
-  .extract-btn.working { background: var(--accent); color: #f0e8d2; cursor: progress; }
+  .extract-btn.working { background: var(--accent); color: #bfb490; cursor: progress; }
   .spacer { flex: 1; }
   .hint {
     color: var(--muted); font-size: 14px;
@@ -900,10 +901,10 @@
   .a3-step.note.octdn { box-shadow: inset 0 -2px 0 var(--accent); }
   .a3-step.rest { color: #3a3a42; }
   .a3-step.active { outline: 2px solid var(--accent); outline-offset: -1px; }
-  .a3-step.flash { background: var(--accent); color: #f0e8d2; }
+  .a3-step.flash { background: var(--accent); color: #bfb490; }
   .a3-step.toggle { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; }
-  .a3-step.toggle.on.accent { background: var(--accent); color: #f0e8d2; border-color: var(--accent); }
-  .a3-step.toggle.on.slide { background: var(--slide); color: #f0e8d2; border-color: var(--slide); }
+  .a3-step.toggle.on.accent { background: var(--accent); color: #bfb490; border-color: var(--accent); }
+  .a3-step.toggle.on.slide { background: var(--slide); color: #bfb490; border-color: var(--slide); }
   .a3-step.toggle.on.gate { background: #2a2a31; color: var(--ink); border-color: #3a3a42; }
   .a3-step-num { height: 16px; font-size: 13px; color: var(--muted); text-align: center; }
   .a3-step-num.beat { color: var(--ink); }
@@ -937,7 +938,7 @@
   .ri-track-preview:hover { border-color: var(--accent); }
   .ri-track-preview:hover::before { border-left-color: var(--accent); }
   .ri-track-preview:active { background: var(--accent); border-color: var(--accent); }
-  .ri-track-preview:active::before { border-left-color: #f0e8d2; }
+  .ri-track-preview:active::before { border-left-color: #bfb490; }
   .ri-seq-numbers .num {
     font-size: 13px; color: var(--muted); text-align: center;
     height: 16px; line-height: 16px;
@@ -986,7 +987,7 @@
     flex-direction: column;
     gap: 3px;
     z-index: 80;
-    background: rgba(232, 224, 200, 0.88);
+    background: rgba(237, 232, 216, 0.88);
     backdrop-filter: blur(10px);
     border: 1px solid var(--line);
     border-radius: 4px;
