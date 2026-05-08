@@ -32,37 +32,37 @@
 <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
 <style>
   :root {
-    /* surface — charred earth, warmer than v1 */
-    --bg: #0a0805;
-    --panel: #15110c;
-    --panel-2: #1d1812;
-    --line: #2a2218;
-    --line-2: #3a2e22;
+    /* surface — cooler neutral, pulled toward Sirât's muted grey-earth */
+    --bg: #0c0b0a;
+    --panel: #141311;
+    --panel-2: #1c1a17;
+    --line: #28251f;
+    --line-2: #35302a;
 
-    /* ink — bleached cream, like the Sirât sky */
-    --ink: #ede0cc;
-    --ink-2: #c4b49a;
-    --muted: #786c5e;
-    --muted-2: #5a4f43;
+    /* ink — bleached cream, Sirât desert sky */
+    --ink: #e4d8c0;
+    --ink-2: #b8a888;
+    --muted: #706858;
+    --muted-2: #504840;
 
-    /* accents — Sirât: faded mustard / scarf rust / dusty slate */
-    --accent: #c03a18;
-    --accent-2: #b89828;
-    --accent-3: #c4a840;
-    --hot: #c03820;
-    --slide: #5a6870;
-    --ok: #a89840;
+    /* accents — Sirât: slate-blue truck is dominant / rust scarf is the only warm hit */
+    --accent: #486070;     /* dusty slate-blue — the truck — primary accent */
+    --accent-2: #88783a;   /* faded ochre sand — secondary, muted */
+    --accent-3: #687060;   /* warm olive-dust */
+    --hot: #a83018;        /* rust scarf — hot/active states only */
+    --slide: #486070;      /* same as accent */
+    --ok: #688060;         /* sage dust — ok/on */
 
-    /* per-module signal colors */
-    --mod-bassline: #c4a840;
-    --mod-drone: #b89828;
-    --mod-drums: #ede0cc;
-    --mod-texture: #b04828;
-    --mod-didge: #9a8438;
+    /* per-module signal colors — diversified, no orange cluster */
+    --mod-bassline: #88783a;  /* faded ochre */
+    --mod-drone: #486070;     /* slate-blue */
+    --mod-drums: #d8cca8;     /* bleached cream */
+    --mod-texture: #786050;   /* dusty clay */
+    --mod-didge: #5a7068;     /* slate-teal */
 
     /* grain + halo */
-    --grain-opacity: 0.06;
-    --ink-shadow: #0a0604;
+    --grain-opacity: 0.055;
+    --ink-shadow: #0a0906;
   }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
@@ -77,23 +77,23 @@
   }
   /* anchor scroll offset so headers don't sit flush against the viewport top */
   .module-section, #sceneGrid, #timelinePanel, #mixerSection { scroll-margin-top: 16px; }
-  /* dust halo — desert dusk wash, sits behind everything */
+  /* dust halo — Sirât: cool slate haze at top (sky), faint rust warmth below (earth) */
   body::after {
     content: '';
     position: fixed; inset: 0;
     pointer-events: none;
     z-index: 0;
     background:
-      radial-gradient(ellipse 90% 55% at 50% -10%, rgba(214, 84, 29, 0.14), transparent 65%),
-      radial-gradient(ellipse 80% 60% at 50% 115%, rgba(184, 152, 40, 0.07), transparent 60%);
+      radial-gradient(ellipse 90% 55% at 50% -10%, rgba(72, 96, 112, 0.13), transparent 65%),
+      radial-gradient(ellipse 80% 60% at 50% 115%, rgba(168, 48, 24, 0.05), transparent 60%);
   }
-  /* dust grain — fractal noise overlay, sits above content but below interaction */
+  /* dust grain — neutral grey grain, not warm-orange */
   body::before {
     content: '';
     position: fixed; inset: 0;
     pointer-events: none;
     z-index: 9999;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.84  0 0 0 0 0.55  0 0 0 0 0.32  0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.54  0 0 0 0 0.52  0 0 0 0 0.50  0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     opacity: var(--grain-opacity);
     mix-blend-mode: overlay;
   }
@@ -359,8 +359,8 @@
     to { transform: rotate(360deg); }
   }
   @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(214, 54, 46, 0.6); }
-    50% { box-shadow: 0 0 0 8px rgba(214, 54, 46, 0); }
+    0%, 100% { box-shadow: 0 0 0 0 rgba(168, 48, 24, 0.6); }
+    50% { box-shadow: 0 0 0 8px rgba(168, 48, 24, 0); }
   }
   .rec-timer {
     font-variant-numeric: tabular-nums;
@@ -399,7 +399,7 @@
     border-radius: 4px;
     transition: background 80ms;
   }
-  .download-link:hover { background: rgba(214, 84, 29, 0.12); }
+  .download-link:hover { background: rgba(72, 96, 112, 0.12); }
   .download-link[hidden] { display: none; }
 
   .master-vol {
@@ -471,7 +471,7 @@
   .module-section .rack-head {
     display: flex; align-items: center; gap: 14px;
     padding: 14px 22px 14px 28px;
-    background: linear-gradient(180deg, rgba(214, 84, 29, 0.05), rgba(214, 84, 29, 0.0));
+    background: linear-gradient(180deg, rgba(72, 96, 112, 0.05), rgba(72, 96, 112, 0.0));
     border: 1px solid var(--line);
     border-bottom: none;
     border-radius: 6px 6px 0 0;
@@ -553,11 +553,11 @@
   .rack-texture  { --mod-color: var(--mod-texture); }
   .rack-didge    { --mod-color: var(--mod-didge); }
 
-  .rack-bassline .rack-head { background: linear-gradient(180deg, rgba(196, 168, 64, 0.07), transparent); }
-  .rack-drone    .rack-head { background: linear-gradient(180deg, rgba(184, 152, 40, 0.06), transparent); }
-  .rack-drums    .rack-head { background: linear-gradient(180deg, rgba(237, 224, 204, 0.04), transparent); }
-  .rack-texture  .rack-head { background: linear-gradient(180deg, rgba(176, 72, 40, 0.07), transparent); }
-  .rack-didge    .rack-head { background: linear-gradient(180deg, rgba(154, 132, 56, 0.06), transparent); }
+  .rack-bassline .rack-head { background: linear-gradient(180deg, rgba(136, 120, 58, 0.07), transparent); }
+  .rack-drone    .rack-head { background: linear-gradient(180deg, rgba(72, 96, 112, 0.07), transparent); }
+  .rack-drums    .rack-head { background: linear-gradient(180deg, rgba(216, 204, 168, 0.04), transparent); }
+  .rack-texture  .rack-head { background: linear-gradient(180deg, rgba(120, 96, 80, 0.07), transparent); }
+  .rack-didge    .rack-head { background: linear-gradient(180deg, rgba(90, 112, 104, 0.07), transparent); }
 
   /* legacy nav.modnav rules now apply to nothing — keep tab-toggle styling for rack-play */
 
@@ -703,7 +703,7 @@
   }
   .scene-btn.active {
     border-color: var(--accent);
-    background: rgba(192, 58, 24, 0.08);
+    background: rgba(72, 96, 112, 0.10);
   }
   .scene-name {
     font-family: 'Bodoni Moda', serif;
@@ -818,12 +818,12 @@
     width: 6px; height: 6px;
     border-radius: 50%;
   }
-  .btn[data-color="warm"]::before { background: #c4a840; }
-  .btn[data-color="deep"]::before { background: #5a6870; }
-  .btn[data-color="bright"]::before { background: #d4bc70; }
+  .btn[data-color="warm"]::before { background: #88783a; }
+  .btn[data-color="deep"]::before { background: #486070; }
+  .btn[data-color="bright"]::before { background: #b0a068; }
   .btn[data-color="dark"]::before { background: #6a5848; }
-  .btn[data-color="driving"]::before { background: #a89840; }
-  .btn[data-color="broken"]::before { background: #c03a18; }
+  .btn[data-color="driving"]::before { background: #687060; }
+  .btn[data-color="broken"]::before { background: #a83018; }
   .preset-legend {
     display: flex; gap: 14px; flex-wrap: wrap;
     font-size: 13px; color: var(--muted);
@@ -847,7 +847,7 @@
     letter-spacing: 0.02em;
     transition: background 80ms;
   }
-  .extract-btn:hover { background: rgba(214, 84, 29, 0.08); }
+  .extract-btn:hover { background: rgba(72, 96, 112, 0.10); }
   .extract-btn.working { background: var(--accent); color: #0a0a0a; cursor: progress; }
   .spacer { flex: 1; }
   .hint {
@@ -1006,11 +1006,11 @@
   }
   .qn-item:hover {
     color: var(--ink);
-    background: rgba(214, 84, 29, 0.06);
+    background: rgba(72, 96, 112, 0.06);
   }
   .qn-item.active {
     color: var(--ink);
-    background: rgba(214, 84, 29, 0.05);
+    background: rgba(72, 96, 112, 0.05);
     border-left-color: var(--mod-color, var(--accent));
   }
   .qn-num {
@@ -1122,7 +1122,7 @@
   }
   .timeline-strip.drop-target {
     border-color: var(--accent);
-    background: rgba(214, 84, 29, 0.04);
+    background: rgba(72, 96, 112, 0.06);
   }
   .timeline-empty {
     position: absolute;
@@ -1158,11 +1158,11 @@
   .timeline-cue:hover { border-color: var(--muted); }
   .timeline-cue.active {
     border-color: var(--accent);
-    box-shadow: 0 0 0 1px var(--accent), 0 0 18px -4px rgba(214, 84, 29, 0.5);
+    box-shadow: 0 0 0 1px var(--accent), 0 0 18px -4px rgba(72, 96, 112, 0.5);
   }
   .timeline-cue.transitioning {
     border-color: var(--accent-2);
-    box-shadow: 0 0 0 1px var(--accent-2), 0 0 18px -4px rgba(196, 58, 106, 0.6);
+    box-shadow: 0 0 0 1px var(--accent-2), 0 0 18px -4px rgba(136, 120, 58, 0.5);
   }
   .timeline-cue.dragging { opacity: 0.4; }
   .timeline-cue .cue-head {
@@ -1394,8 +1394,8 @@
 
   /* ── first-use onboarding ───────────────────────────────────────── */
   @keyframes first-use-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(214, 84, 29, 0); }
-    50%      { box-shadow: 0 0 0 8px rgba(214, 84, 29, 0.22); }
+    0%, 100% { box-shadow: 0 0 0 0 rgba(72, 96, 112, 0); }
+    50%      { box-shadow: 0 0 0 8px rgba(72, 96, 112, 0.25); }
   }
   .first-use-pulse {
     animation: first-use-pulse 1.6s ease-in-out infinite;
